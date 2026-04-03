@@ -144,6 +144,8 @@ function renderApp() {
   const currentWordBankPage = Math.min(state.wordBankPage, wordBankTotalPages);
   const visibleWordBank = filteredWordBank.slice((currentWordBankPage - 1) * wordBankPageSize, currentWordBankPage * wordBankPageSize);
   const mascot = getMascotState(state.mascotMood);
+  const frontTitleClass = getFlashcardTitleClass(currentWord.spanish);
+  const backTitleClass = getFlashcardTitleClass(currentWord.korean);
 
   app.innerHTML = `
     <div class="app-shell">
@@ -245,9 +247,11 @@ function renderApp() {
 
             <div class="study-toolbar">
               <div class="mascot-card mascot-card--${mascot.tone}">
-                <div class="mascot-face" aria-hidden="true">
-                  <span class="mascot-face__eyes">${mascot.eyes}</span>
-                  <span class="mascot-face__mouth">${mascot.mouth}</span>
+                <div class="mascot-face mascot-face--${mascot.tone}" aria-hidden="true">
+                  <span class="mascot-face__eye mascot-face__eye--left"></span>
+                  <span class="mascot-face__eye mascot-face__eye--right"></span>
+                  <span class="mascot-face__nose"></span>
+                  <span class="mascot-face__mouth"></span>
                 </div>
                 <div class="mascot-copy">
                   <strong>${escapeHtml(mascot.title)}</strong>
@@ -267,7 +271,7 @@ function renderApp() {
                   <div class="flashcard__layout">
                     <div class="flashcard__main">
                       <span class="flashcard__label">Spanish</span>
-                      <h3 class="flashcard__title">${escapeHtml(currentWord.spanish)}</h3>
+                      <h3 class="flashcard__title ${frontTitleClass}">${escapeHtml(currentWord.spanish)}</h3>
                       <p>${escapeHtml(currentWord.example)}</p>
                       <button class="sound-button" data-action="speak" data-word="${escapeAttribute(currentWord.spanish)}">발음 듣기</button>
                       <span class="card-level-tag">레벨 ${currentWord.difficulty}</span>
@@ -294,7 +298,7 @@ function renderApp() {
                   <div class="flashcard__layout">
                     <div class="flashcard__main">
                       <span class="flashcard__label">Korean</span>
-                      <h3 class="flashcard__title flashcard__title--back">${escapeHtml(currentWord.korean)}</h3>
+                      <h3 class="flashcard__title flashcard__title--back ${backTitleClass}">${escapeHtml(currentWord.korean)}</h3>
                       <p>${escapeHtml(currentWord.hint)}</p>
                       <span class="difficulty-badge">난이도 ${currentWord.difficulty}</span>
                     </div>
@@ -1054,6 +1058,17 @@ function getWordPriorityScore(word, progress) {
   return score;
 }
 
+function getFlashcardTitleClass(text) {
+  const length = (text || "").trim().length;
+  if (length >= 11) {
+    return "flashcard__title--xlong";
+  }
+  if (length >= 8) {
+    return "flashcard__title--long";
+  }
+  return "";
+}
+
 function setMascotReaction(mood, message) {
   state.mascotMood = mood;
   state.mascotMessage = message;
@@ -1061,10 +1076,10 @@ function setMascotReaction(mood, message) {
 
 function getMascotState(mood) {
   const mascotMap = {
-    calm: { title: "팔라", tone: "calm", eyes: "• •", mouth: "◡" },
-    happy: { title: "팔라", tone: "happy", eyes: "^ ^", mouth: "◡" },
-    celebrate: { title: "팔라", tone: "celebrate", eyes: "★ ★", mouth: "▽" },
-    thinking: { title: "팔라", tone: "thinking", eyes: "• •", mouth: "﹏" }
+    calm: { title: "팔라", tone: "calm" },
+    happy: { title: "팔라", tone: "happy" },
+    celebrate: { title: "팔라", tone: "celebrate" },
+    thinking: { title: "팔라", tone: "thinking" }
   };
   return mascotMap[mood] || mascotMap.calm;
 }
