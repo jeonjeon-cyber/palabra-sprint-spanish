@@ -1102,41 +1102,27 @@ function getVoiceChoices(voices) {
     return [];
   }
 
-  const matches = [
-    {
-      id: "spain-female",
-      label: "스페인 표준 여성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-ES"], ["helena", "monica", "maria", "female", "woman", "carmen", "elvira"])
-    },
-    {
-      id: "spain-male",
-      label: "스페인 표준 남성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-ES"], ["jorge", "diego", "male", "man", "raul", "carlos"])
-    },
-    {
-      id: "latam-female",
-      label: "중남미 여성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["paulina", "sabina", "female", "woman", "monica", "sofia"])
-    },
-    {
-      id: "latam-male",
-      label: "중남미 남성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["male", "man", "jorge", "carlos", "diego"])
+  const uniqueVoices = [];
+  const seen = new Set();
+  voices.forEach((voice) => {
+    if (!seen.has(voice.voiceURI)) {
+      seen.add(voice.voiceURI);
+      uniqueVoices.push(voice);
     }
-  ];
-
-  const genericSpanishVoices = voices.filter((voice) => /^es/i.test(voice.lang || ""));
-  return matches.map((choice, index) => {
-    const fallbackVoice = genericSpanishVoices[index] || genericSpanishVoices[0] || voices[0];
-    const available = Boolean(choice.voice);
-    return {
-      id: choice.id,
-      label: choice.label,
-      voice: available ? choice.voice : null,
-      fallbackVoice,
-      available
-    };
   });
+
+  const prioritized = [...uniqueVoices].sort((left, right) => {
+    return getVoicePriority(left) - getVoicePriority(right);
+  }).slice(0, 4);
+
+  return prioritized.map((voice, index) => ({
+    id: voice.voiceURI,
+    label: index === 0
+      ? `추천 목소리 · ${getVoiceLocaleLabel(voice.lang)}`
+      : `스페인어 목소리 ${index + 1} · ${getVoiceLocaleLabel(voice.lang)}`,
+    voice,
+    available: true
+  }));
 }
 
 function getSelectedVoiceChoice(progress, voiceChoices) {
@@ -1154,20 +1140,28 @@ function getSelectedVoiceChoice(progress, voiceChoices) {
     return legacyByURI;
   }
 
-  return voiceChoices.find((choice) => choice.available) || voiceChoices[0];
+  return voiceChoices[0];
 }
 
-function findVoiceByPatterns(voices, langPriorities, namePatterns) {
-  for (const lang of langPriorities) {
-    const langVoices = voices.filter((voice) => voice.lang === lang);
-    for (const pattern of namePatterns) {
-      const matched = langVoices.find((voice) => new RegExp(pattern, "i").test(voice.name));
-      if (matched) {
-        return matched;
-      }
-    }
-  }
-  return null;
+function getVoicePriority(voice) {
+  const lang = (voice.lang || "").toLowerCase();
+  const name = (voice.name || "").toLowerCase();
+  if (lang === "es-es") return 0;
+  if (lang === "es-mx") return 1;
+  if (lang.startsWith("es") && /google|microsoft|natural/.test(name)) return 2;
+  if (lang.startsWith("es")) return 3;
+  return 10;
+}
+
+function getVoiceLocaleLabel(lang) {
+  const normalized = (lang || "").toLowerCase();
+  if (normalized === "es-es") return "스페인";
+  if (normalized === "es-mx") return "멕시코";
+  if (normalized === "es-us") return "미국 스페인어";
+  if (normalized === "es-ar") return "아르헨티나";
+  if (normalized === "es-co") return "콜롬비아";
+  if (normalized.startsWith("es")) return "기타 스페인어";
+  return "사용 가능 음성";
 }
 
 function shuffled(items) {
