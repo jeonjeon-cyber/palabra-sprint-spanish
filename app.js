@@ -131,6 +131,7 @@ function renderApp() {
   const spanishVoices = getSpanishVoices();
   const voiceChoices = getVoiceChoices(spanishVoices);
   const selectedVoiceChoice = getSelectedVoiceChoice(progress, voiceChoices);
+  const grammarInfo = getGrammarInfo(currentWord);
 
   app.innerHTML = `
     <div class="app-shell">
@@ -248,18 +249,56 @@ function renderApp() {
               <div class="flashcard__inner">
                 <div class="flashcard__face flashcard__face--front">
                   <button class="card-toggle-button" data-action="flip-card">뜻 보기</button>
-                  <span class="flashcard__label">Spanish</span>
-                  <h3>${escapeHtml(currentWord.spanish)}</h3>
-                  <p>${escapeHtml(currentWord.example)}</p>
-                  <button class="sound-button" data-action="speak" data-word="${escapeAttribute(currentWord.spanish)}">발음 듣기</button>
-                  <span class="card-level-tag">레벨 ${currentWord.difficulty}</span>
+                  <div class="flashcard__layout">
+                    <div class="flashcard__main">
+                      <span class="flashcard__label">Spanish</span>
+                      <h3>${escapeHtml(currentWord.spanish)}</h3>
+                      <p>${escapeHtml(currentWord.example)}</p>
+                      <button class="sound-button" data-action="speak" data-word="${escapeAttribute(currentWord.spanish)}">발음 듣기</button>
+                      <span class="card-level-tag">레벨 ${currentWord.difficulty}</span>
+                    </div>
+                    <aside class="grammar-panel">
+                      <p class="grammar-panel__eyebrow">문장 분석</p>
+                      <div class="grammar-panel__item">
+                        <span>품사</span>
+                        <strong>${escapeHtml(grammarInfo.partOfSpeech)}</strong>
+                      </div>
+                      <div class="grammar-panel__item">
+                        <span>문장 역할</span>
+                        <strong>${escapeHtml(grammarInfo.sentenceRole)}</strong>
+                      </div>
+                      <div class="grammar-panel__item">
+                        <span>핵심 포인트</span>
+                        <strong>${escapeHtml(grammarInfo.grammarTip)}</strong>
+                      </div>
+                    </aside>
+                  </div>
                 </div>
                 <div class="flashcard__face flashcard__face--back">
                   <button class="card-toggle-button" data-action="flip-card">앞면 보기</button>
-                  <span class="flashcard__label">Korean</span>
-                  <h3>${escapeHtml(currentWord.korean)}</h3>
-                  <p>${escapeHtml(currentWord.hint)}</p>
-                  <span class="difficulty-badge">난이도 ${currentWord.difficulty}</span>
+                  <div class="flashcard__layout">
+                    <div class="flashcard__main">
+                      <span class="flashcard__label">Korean</span>
+                      <h3>${escapeHtml(currentWord.korean)}</h3>
+                      <p>${escapeHtml(currentWord.hint)}</p>
+                      <span class="difficulty-badge">난이도 ${currentWord.difficulty}</span>
+                    </div>
+                    <aside class="grammar-panel grammar-panel--back">
+                      <p class="grammar-panel__eyebrow">학습 포인트</p>
+                      <div class="grammar-panel__item">
+                        <span>품사 기억법</span>
+                        <strong>${escapeHtml(grammarInfo.memoryTip)}</strong>
+                      </div>
+                      <div class="grammar-panel__item">
+                        <span>예문 속 위치</span>
+                        <strong>${escapeHtml(grammarInfo.positionHint)}</strong>
+                      </div>
+                      <div class="grammar-panel__item">
+                        <span>연습 팁</span>
+                        <strong>${escapeHtml(grammarInfo.practiceTip)}</strong>
+                      </div>
+                    </aside>
+                  </div>
                 </div>
               </div>
             </article>
@@ -875,6 +914,82 @@ function getPreferredVoice(voices) {
 
   const naturalVoice = voices.find((voice) => /natural|google|microsoft|helena|jorge|paulina|sabina|monica/i.test(voice.name));
   return naturalVoice || voices[0];
+}
+
+function getGrammarInfo(word) {
+  const lower = word.spanish.toLowerCase();
+  const exampleLower = word.example.toLowerCase();
+  const isInfinitiveVerb = lower.endsWith("ar") || lower.endsWith("er") || lower.endsWith("ir");
+  const adjectiveHints = ["형용사", "감정"];
+  const nounHints = ["사람", "장소", "사물", "음식", "기본"];
+
+  let partOfSpeech = "명사";
+  if (isInfinitiveVerb) {
+    partOfSpeech = "동사";
+  } else if (adjectiveHints.includes(word.category)) {
+    partOfSpeech = "형용사";
+  } else if (lower === "sí" || lower === "no" || lower.endsWith("mente")) {
+    partOfSpeech = "부사/표현";
+  } else if (nounHints.includes(word.category)) {
+    partOfSpeech = "명사";
+  }
+
+  let sentenceRole = "문장 속 핵심 의미어";
+  if (exampleLower.startsWith(lower) || exampleLower.includes(` ${lower} `)) {
+    sentenceRole = partOfSpeech === "동사" ? "동작을 나타내는 서술어" : "핵심 뜻을 담당하는 중심어";
+  }
+  if (partOfSpeech === "형용사") {
+    sentenceRole = "상태나 성질을 설명하는 보어/수식어";
+  }
+  if (partOfSpeech === "명사") {
+    sentenceRole = exampleLower.startsWith(lower) || exampleLower.includes(` ${lower} `)
+      ? "주어 또는 목적어 역할의 명사"
+      : "문장 안 정보를 채우는 명사";
+  }
+  if (partOfSpeech === "부사/표현") {
+    sentenceRole = "문장 전체 뉘앙스를 조정하는 표현";
+  }
+
+  const grammarTip = partOfSpeech === "형용사"
+    ? "명사의 상태를 설명하거나 ser/estar 뒤에서 자주 쓰입니다."
+    : partOfSpeech === "동사"
+      ? "주어에 따라 형태가 바뀌므로 활용형과 함께 익히면 좋습니다."
+      : partOfSpeech === "부사/표현"
+        ? "문장 맨 앞이나 동사 앞뒤에서 뉘앙스를 부드럽게 바꿉니다."
+        : "관사와 함께 쓰이거나 전치사 뒤에 와서 문장 정보를 채웁니다.";
+
+  const memoryTip = partOfSpeech === "형용사"
+    ? `"${word.korean}"처럼 상태를 붙여 말하는 단어라고 기억하면 쉽습니다.`
+    : partOfSpeech === "동사"
+      ? `"~하다"로 끝나는 뜻으로 묶어서 외우면 활용이 빨라집니다.`
+      : partOfSpeech === "부사/표현"
+        ? "짧게 바로 반응할 때 쓰는 표현으로 통째로 익히면 좋습니다."
+        : "사물·사람·장소 이름을 붙이는 기본 단어라고 생각하면 됩니다.";
+
+  const positionHint = partOfSpeech === "형용사"
+    ? "예문에서는 동사 뒤에서 상태를 설명하는 위치에 나옵니다."
+    : partOfSpeech === "동사"
+      ? "예문에서 주어 다음에 와서 행동을 이끕니다."
+      : partOfSpeech === "부사/표현"
+        ? "문장 앞이나 동사 옆에 붙어 말의 분위기를 만듭니다."
+        : "예문에서 주어, 목적어, 장소 정보로 자연스럽게 들어갑니다.";
+
+  const practiceTip = partOfSpeech === "형용사"
+    ? `"Estoy/Es + ${word.spanish}" 형태로 한 번 더 말해보세요.`
+    : partOfSpeech === "동사"
+      ? `"yo + ${word.spanish}" 또는 예문 속 활용형을 소리 내어 따라해보세요.`
+      : partOfSpeech === "부사/표현"
+        ? "짧은 대답 문장에 넣어서 바로 반응하듯 연습해보세요."
+        : `"el/la + ${word.spanish}" 또는 예문 그대로 따라 읽으면 익숙해집니다.`;
+
+  return {
+    partOfSpeech,
+    sentenceRole,
+    grammarTip,
+    memoryTip,
+    positionHint,
+    practiceTip
+  };
 }
 
 function getVoiceChoices(voices) {
