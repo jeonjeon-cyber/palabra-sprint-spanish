@@ -101,6 +101,7 @@ const state = {
   wordBankQuery: "",
   wordBankFilter: "all",
   wordBankPage: 1,
+  handlersBound: false,
   mascotMood: "calm",
   mascotMessage: "오늘도 차근차근 가보자!"
 };
@@ -109,6 +110,7 @@ initialize();
 
 function initialize() {
   setupVoices();
+  setupGlobalHandlers();
   resetStudyFlow();
   renderApp();
 }
@@ -253,7 +255,7 @@ function renderApp() {
                 </div>
               </div>
               <div class="word-status-actions">
-                <button type="button" class="${isFavoriteWord ? "status-chip is-active" : "status-chip"}" data-action="toggle-favorite">즐겨찾기</button>
+                <button type="button" class="${isFavoriteWord ? "status-chip favorite is-active" : "status-chip favorite"}" data-action="toggle-favorite">즐겨찾기</button>
                 <button type="button" class="${isReviewWord ? "status-chip is-active review" : "status-chip review"}" data-action="toggle-review">복습 필요</button>
               </div>
             </div>
@@ -450,13 +452,21 @@ function renderApp() {
           <div class="word-grid">
             ${visibleWordBank.map((word) => {
               const learned = progress.learnedWords.includes(word.id);
+              const isFavorite = progress.favoriteWords.includes(word.id);
+              const isReview = progress.reviewWords.includes(word.id);
+              const wordChipClass = [
+                "word-chip",
+                isFavorite ? "word-chip--favorite" : "",
+                isReview ? "word-chip--review" : ""
+              ].filter(Boolean).join(" ");
               return `
-                <article class="word-chip">
+                <article class="${wordChipClass}">
+                  ${isFavorite ? `<span class="word-chip__pin">★ 즐겨찾기</span>` : ""}
                   <strong>${escapeHtml(word.spanish)}</strong>
                   <span>${escapeHtml(word.korean)}</span>
                   <span class="word-chip__tag">${learned ? "학습 완료" : escapeHtml(word.category)}</span>
                   <span class="word-chip__meta">레벨 ${word.difficulty}</span>
-                  <span class="word-chip__meta">${progress.favoriteWords.includes(word.id) ? "즐겨찾기 저장됨" : progress.reviewWords.includes(word.id) ? "복습 필요 단어" : "메모 가능"}</span>
+                  <span class="word-chip__meta">${isFavorite ? "즐겨찾기 목록에 추가됨" : isReview ? "복습 필요 단어" : "메모 가능"}</span>
                 </article>
               `;
             }).join("")}
@@ -590,6 +600,7 @@ function bindEvents(levelWords, quizWord) {
 
   document.querySelectorAll("[data-action='toggle-favorite']").forEach((button) => {
     button.addEventListener("click", (event) => {
+      return;
       event.preventDefault();
       event.stopPropagation();
       const progress = getActiveProfile().progress;
@@ -607,6 +618,7 @@ function bindEvents(levelWords, quizWord) {
 
   document.querySelectorAll("[data-action='toggle-review']").forEach((button) => {
     button.addEventListener("click", (event) => {
+      return;
       event.preventDefault();
       event.stopPropagation();
       const progress = getActiveProfile().progress;
@@ -792,6 +804,61 @@ function bindOptional(selector, eventName, handler) {
   }
 }
 
+function setupGlobalHandlers() {
+  if (state.handlersBound) {
+    return;
+  }
+
+  const app = document.getElementById("app");
+  if (!app) {
+    return;
+  }
+
+  app.addEventListener("click", (event) => {
+    const actionTarget = event.target.closest("[data-action='toggle-favorite'], [data-action='toggle-review']");
+    if (!actionTarget) {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const profile = getActiveProfile();
+    if (!profile) {
+      return;
+    }
+
+    const levelWords = getWordsForExactLevel(getActiveLevelNumber(profile.progress));
+    const currentWord = levelWords[state.flashIndex % levelWords.length] || WORDS[0];
+    const progress = profile.progress;
+
+    if (actionTarget.dataset.action === "toggle-favorite") {
+      toggleWordInList(progress.favoriteWords, currentWord.id);
+      setMascotReaction(
+        progress.favoriteWords.includes(currentWord.id) ? "happy" : "calm",
+        progress.favoriteWords.includes(currentWord.id)
+          ? `"${currentWord.spanish}" 단어를 즐겨찾기에 넣었어요. 아래 Word Bank 맨 앞에서도 보여줄게요.`
+          : `"${currentWord.spanish}" 단어를 즐겨찾기에서 뺐어요.`
+      );
+    }
+
+    if (actionTarget.dataset.action === "toggle-review") {
+      toggleWordInList(progress.reviewWords, currentWord.id);
+      setMascotReaction(
+        progress.reviewWords.includes(currentWord.id) ? "thinking" : "calm",
+        progress.reviewWords.includes(currentWord.id)
+          ? `"${currentWord.spanish}" 단어를 복습 필요 목록에 담았어요.`
+          : `"${currentWord.spanish}" 단어를 복습 필요 목록에서 뺐어요.`
+      );
+    }
+
+    saveDatabase();
+    renderApp();
+  });
+
+  state.handlersBound = true;
+}
+
 function getAvailableWords(level) {
   return WORDS.filter((word) => word.difficulty <= level);
 }
@@ -964,7 +1031,27 @@ function getFilteredWordBank(levelWords, progress) {
       return progress.favoriteWords.includes(word.id);
     }
     return true;
+  }).sort((left, right) => {
+    const scoreDiff = getWordPriorityScore(right, progress) - getWordPriorityScore(left, progress);
+    if (scoreDiff !== 0) {
+      return scoreDiff;
+    }
+    return left.id - right.id;
   });
+}
+
+function getWordPriorityScore(word, progress) {
+  let score = 0;
+  if (progress.favoriteWords.includes(word.id)) {
+    score += 30;
+  }
+  if (progress.reviewWords.includes(word.id)) {
+    score += 20;
+  }
+  if (progress.learnedWords.includes(word.id)) {
+    score += 10;
+  }
+  return score;
 }
 
 function setMascotReaction(mood, message) {

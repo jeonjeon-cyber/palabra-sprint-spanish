@@ -457,11 +457,24 @@ button {
   box-shadow: 0 4px 10px rgba(29, 24, 16, 0.04);
 }
 
+.status-chip.favorite {
+  background: linear-gradient(180deg, rgba(255, 244, 207, 0.98), rgba(255, 232, 176, 0.94));
+  border-color: rgba(255, 194, 62, 0.38);
+  color: #6b4a00;
+}
+
 .status-chip.is-active {
   background: linear-gradient(180deg, #1d8f6c, #167557);
   color: white;
   border-color: rgba(29, 143, 108, 0.55);
   box-shadow: 0 10px 22px rgba(29, 143, 108, 0.24);
+}
+
+.status-chip.favorite.is-active {
+  background: linear-gradient(180deg, #ffd86e, #ffbb3f);
+  color: #5c3b00;
+  border-color: rgba(255, 177, 32, 0.7);
+  box-shadow: 0 12px 26px rgba(255, 185, 56, 0.32);
 }
 
 .status-chip.review.is-active {
@@ -882,10 +895,12 @@ button {
 }
 
 .word-chip {
+  position: relative;
   padding: 16px;
   border-radius: 18px;
   background: var(--surface-strong);
   border: 1px solid var(--line);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
 }
 
 .word-chip strong,
@@ -910,6 +925,32 @@ button {
   margin-top: 8px;
   font-size: 0.88rem;
   color: #8a7f71;
+}
+
+.word-chip--favorite {
+  border-color: rgba(255, 186, 41, 0.42);
+  background: linear-gradient(180deg, rgba(255, 251, 238, 0.98), rgba(255, 245, 220, 0.98));
+  box-shadow: 0 14px 28px rgba(255, 193, 74, 0.12);
+}
+
+.word-chip--review {
+  border-color: rgba(29, 143, 108, 0.24);
+  background: linear-gradient(180deg, rgba(248, 255, 250, 0.98), rgba(239, 250, 245, 0.98));
+}
+
+.word-chip__pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  width: fit-content;
+  background: rgba(255, 204, 84, 0.22);
+  color: #7a5200;
+  font-size: 0.82rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
 }
 
 @media (max-width: 920px) {
