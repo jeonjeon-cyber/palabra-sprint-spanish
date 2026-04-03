@@ -369,6 +369,70 @@ button {
   margin-bottom: 18px;
 }
 
+.mascot-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 250px;
+  padding: 16px 18px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(250,245,236,0.95));
+}
+
+.mascot-card--happy {
+  background: linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(246, 255, 247, 0.95));
+}
+
+.mascot-card--celebrate {
+  background: linear-gradient(180deg, rgba(255, 245, 212, 0.98), rgba(236, 255, 241, 0.95));
+}
+
+.mascot-card--thinking {
+  background: linear-gradient(180deg, rgba(250, 247, 240, 0.98), rgba(243, 246, 251, 0.95));
+}
+
+.mascot-face {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #ffdf93, #ffbe59);
+  box-shadow: inset 0 -8px 18px rgba(0, 0, 0, 0.08);
+}
+
+.mascot-face__eyes,
+.mascot-face__mouth {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: 800;
+  color: #3d2f12;
+}
+
+.mascot-face__eyes {
+  top: 18px;
+  font-size: 1rem;
+  letter-spacing: 0.18em;
+}
+
+.mascot-face__mouth {
+  bottom: 12px;
+  font-size: 1.15rem;
+}
+
+.mascot-copy strong {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.mascot-copy p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+  font-size: 0.95rem;
+}
+
 .goal-card {
   min-width: 230px;
   padding: 16px 18px;
@@ -784,6 +848,57 @@ button {
   gap: 14px;
 }
 
+.wordbank-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.wordbank-search {
+  min-width: 240px;
+  flex: 1;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.9);
+}
+
+.wordbank-filters,
+.wordbank-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wordbank-filter {
+  padding: 10px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(255,255,255,0.7);
+  color: var(--text);
+}
+
+.wordbank-filter.is-active {
+  background: var(--primary);
+  color: white;
+}
+
+.wordbank-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.wordbank-summary {
+  margin: 0;
+  color: var(--muted);
+}
+
 .word-chip {
   padding: 16px;
   border-radius: 18px;
@@ -825,6 +940,10 @@ button {
 
   .study-toolbar {
     flex-direction: column;
+  }
+
+  .mascot-card {
+    min-width: 0;
   }
 }
 

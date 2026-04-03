@@ -97,7 +97,12 @@ const state = {
   isFlipped: false,
   quizIndex: 0,
   quizEntries: [],
-  availableVoices: []
+  availableVoices: [],
+  wordBankQuery: "",
+  wordBankFilter: "all",
+  wordBankPage: 1,
+  mascotMood: "calm",
+  mascotMessage: "오늘도 차근차근 가보자!"
 };
 
 initialize();
@@ -132,6 +137,12 @@ function renderApp() {
   const voiceChoices = getVoiceChoices(spanishVoices);
   const selectedVoiceChoice = getSelectedVoiceChoice(progress, voiceChoices);
   const grammarInfo = getGrammarInfo(currentWord);
+  const filteredWordBank = getFilteredWordBank(levelWords, progress);
+  const wordBankPageSize = 8;
+  const wordBankTotalPages = Math.max(1, Math.ceil(filteredWordBank.length / wordBankPageSize));
+  const currentWordBankPage = Math.min(state.wordBankPage, wordBankTotalPages);
+  const visibleWordBank = filteredWordBank.slice((currentWordBankPage - 1) * wordBankPageSize, currentWordBankPage * wordBankPageSize);
+  const mascot = getMascotState(state.mascotMood);
 
   app.innerHTML = `
     <div class="app-shell">
@@ -237,6 +248,16 @@ function renderApp() {
                 <strong>${todayProgress.learnedCount} / ${progress.dailyGoal}</strong>
                 <div class="goal-meter">
                   <div class="goal-meter__fill" style="width: ${Math.min(100, Math.round((todayProgress.learnedCount / progress.dailyGoal) * 100))}%"></div>
+                </div>
+              </div>
+              <div class="mascot-card mascot-card--${mascot.tone}">
+                <div class="mascot-face" aria-hidden="true">
+                  <span class="mascot-face__eyes">${mascot.eyes}</span>
+                  <span class="mascot-face__mouth">${mascot.mouth}</span>
+                </div>
+                <div class="mascot-copy">
+                  <strong>${escapeHtml(mascot.title)}</strong>
+                  <p>${escapeHtml(state.mascotMessage)}</p>
                 </div>
               </div>
               <div class="word-status-actions">
@@ -419,8 +440,23 @@ function renderApp() {
               <h2>현재 레벨 학습 단어</h2>
             </div>
           </div>
+          <div class="wordbank-toolbar">
+            <input
+              id="wordbank-search"
+              class="wordbank-search"
+              type="text"
+              placeholder="단어 검색"
+              value="${escapeAttribute(state.wordBankQuery)}"
+            >
+            <div class="wordbank-filters">
+              <button class="${state.wordBankFilter === "all" ? "wordbank-filter is-active" : "wordbank-filter"}" data-action="set-wordbank-filter" data-filter="all">전체</button>
+              <button class="${state.wordBankFilter === "learned" ? "wordbank-filter is-active" : "wordbank-filter"}" data-action="set-wordbank-filter" data-filter="learned">학습 완료</button>
+              <button class="${state.wordBankFilter === "review" ? "wordbank-filter is-active" : "wordbank-filter"}" data-action="set-wordbank-filter" data-filter="review">복습 필요</button>
+              <button class="${state.wordBankFilter === "favorite" ? "wordbank-filter is-active" : "wordbank-filter"}" data-action="set-wordbank-filter" data-filter="favorite">즐겨찾기</button>
+            </div>
+          </div>
           <div class="word-grid">
-            ${levelWords.map((word) => {
+            ${visibleWordBank.map((word) => {
               const learned = progress.learnedWords.includes(word.id);
               return `
                 <article class="word-chip">
@@ -432,6 +468,13 @@ function renderApp() {
                 </article>
               `;
             }).join("")}
+          </div>
+          <div class="wordbank-footer">
+            <p class="wordbank-summary">총 ${filteredWordBank.length}개 중 ${visibleWordBank.length}개 표시 · ${currentWordBankPage} / ${wordBankTotalPages} 페이지</p>
+            <div class="wordbank-pagination">
+              <button class="ghost-button ghost-button--small" data-action="change-wordbank-page" data-page="${Math.max(1, currentWordBankPage - 1)}" ${currentWordBankPage === 1 ? "disabled" : ""}>이전</button>
+              <button class="ghost-button ghost-button--small" data-action="change-wordbank-page" data-page="${Math.min(wordBankTotalPages, currentWordBankPage + 1)}" ${currentWordBankPage === wordBankTotalPages ? "disabled" : ""}>다음</button>
+            </div>
           </div>
         </section>
       </main>
@@ -513,7 +556,10 @@ function bindEvents(levelWords, quizWord) {
       progress.learnedWords.push(word.id);
       progress.xp += 12;
       incrementTodayLearned(progress);
+      setMascotReaction("celebrate", `"${word.spanish}" 외웠다! 아주 잘하고 있어.`);
       saveDatabase();
+    } else {
+      setMascotReaction("happy", "이미 외운 단어도 다시 보는 습관이 좋아!");
     }
     state.isFlipped = false;
     state.flashIndex = (state.flashIndex + 1) % levelWords.length;
@@ -553,6 +599,7 @@ function bindEvents(levelWords, quizWord) {
   bindOptional("[data-action='toggle-favorite']", "click", () => {
     const progress = getActiveProfile().progress;
     toggleWordInList(progress.favoriteWords, currentWord.id);
+    setMascotReaction("happy", `좋아, "${currentWord.spanish}"를 즐겨찾기에 넣어둘게!`);
     saveDatabase();
     renderApp();
   });
@@ -560,6 +607,7 @@ function bindEvents(levelWords, quizWord) {
   bindOptional("[data-action='toggle-review']", "click", () => {
     const progress = getActiveProfile().progress;
     toggleWordInList(progress.reviewWords, currentWord.id);
+    setMascotReaction("thinking", `좋아, "${currentWord.spanish}"는 복습 카드로 챙겨둘게.`);
     saveDatabase();
     renderApp();
   });
@@ -591,6 +639,30 @@ function bindEvents(levelWords, quizWord) {
     });
   }
 
+  const wordbankSearch = document.getElementById("wordbank-search");
+  if (wordbankSearch) {
+    wordbankSearch.addEventListener("input", () => {
+      state.wordBankQuery = wordbankSearch.value;
+      state.wordBankPage = 1;
+      renderApp();
+    });
+  }
+
+  document.querySelectorAll("[data-action='set-wordbank-filter']").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.wordBankFilter = button.dataset.filter;
+      state.wordBankPage = 1;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll("[data-action='change-wordbank-page']").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.wordBankPage = Number(button.dataset.page);
+      renderApp();
+    });
+  });
+
   document.querySelectorAll("[data-action='answer-quiz']").forEach((button) => {
     button.addEventListener("click", () => {
       const currentEntry = state.quizEntries[state.quizIndex];
@@ -606,6 +678,10 @@ function bindEvents(levelWords, quizWord) {
       currentEntry.feedback = isCorrect
         ? "정답입니다. 발음을 들으며 한 번 더 익혀보세요."
         : `아쉬워요. 정답은 "${quizWord.korean}" 입니다.`;
+      setMascotReaction(
+        isCorrect ? (progress.streak >= 2 ? "celebrate" : "happy") : "thinking",
+        isCorrect ? `좋았어! "${quizWord.spanish}" 정답이야.` : `괜찮아, "${quizWord.spanish}"는 다시 보면 돼.`
+      );
 
       progress.totalAnswers += 1;
       progress.correctAnswers += isCorrect ? 1 : 0;
@@ -857,6 +933,43 @@ function toggleWordInList(list, wordId) {
   } else {
     list.push(wordId);
   }
+}
+
+function getFilteredWordBank(levelWords, progress) {
+  return levelWords.filter((word) => {
+    const matchesQuery = !state.wordBankQuery
+      || word.spanish.toLowerCase().includes(state.wordBankQuery.toLowerCase())
+      || word.korean.includes(state.wordBankQuery);
+    if (!matchesQuery) {
+      return false;
+    }
+
+    if (state.wordBankFilter === "learned") {
+      return progress.learnedWords.includes(word.id);
+    }
+    if (state.wordBankFilter === "review") {
+      return progress.reviewWords.includes(word.id);
+    }
+    if (state.wordBankFilter === "favorite") {
+      return progress.favoriteWords.includes(word.id);
+    }
+    return true;
+  });
+}
+
+function setMascotReaction(mood, message) {
+  state.mascotMood = mood;
+  state.mascotMessage = message;
+}
+
+function getMascotState(mood) {
+  const mascotMap = {
+    calm: { title: "팔라", tone: "calm", eyes: "• •", mouth: "◡" },
+    happy: { title: "팔라", tone: "happy", eyes: "^ ^", mouth: "◡" },
+    celebrate: { title: "팔라", tone: "celebrate", eyes: "★ ★", mouth: "▽" },
+    thinking: { title: "팔라", tone: "thinking", eyes: "• •", mouth: "﹏" }
+  };
+  return mascotMap[mood] || mascotMap.calm;
 }
 
 function speak(text, progress) {
