@@ -340,8 +340,8 @@ function renderApp() {
                 <label class="voice-label" for="voice-select">스페인어 목소리</label>
                 <select id="voice-select" class="voice-select">
                   ${voiceChoices.length ? voiceChoices.map((choice) => `
-                    <option value="${escapeAttribute(choice.id)}" ${selectedVoiceChoice.id === choice.id ? "selected" : ""}>
-                      ${escapeHtml(choice.label)}
+                    <option value="${escapeAttribute(choice.id)}" ${selectedVoiceChoice.id === choice.id ? "selected" : ""} ${choice.available ? "" : "disabled"}>
+                      ${escapeHtml(choice.label)}${choice.available ? "" : " (사용 불가)"}
                     </option>
                   `).join("") : `<option value="">사용 가능한 음성을 불러오는 중</option>`}
                 </select>
@@ -1001,36 +1001,35 @@ function getVoiceChoices(voices) {
     {
       id: "spain-female",
       label: "스페인 표준 여성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-ES"], ["helena", "monica", "maria", "female", "woman"])
+      voice: findVoiceByPatterns(voices, ["es-ES"], ["helena", "monica", "maria", "female", "woman", "carmen", "elvira"])
     },
     {
       id: "spain-male",
       label: "스페인 표준 남성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-ES"], ["jorge", "diego", "male", "man"])
+      voice: findVoiceByPatterns(voices, ["es-ES"], ["jorge", "diego", "male", "man", "raul", "carlos"])
     },
     {
       id: "latam-female",
       label: "중남미 여성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["paulina", "sabina", "female", "woman"])
+      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["paulina", "sabina", "female", "woman", "monica", "sofia"])
     },
     {
       id: "latam-male",
       label: "중남미 남성 목소리",
-      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["male", "man"])
+      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["male", "man", "jorge", "carlos", "diego"])
     }
   ];
 
-  const fallbackPool = [...voices];
-  return matches.map((choice) => {
-    let voice = choice.voice;
-    if (!voice) {
-      voice = fallbackPool.find((candidate) => !matches.some((item) => item.voice && item.voice.voiceURI === candidate.voiceURI))
-        || fallbackPool[0];
-    }
+  const genericSpanishVoices = voices.filter((voice) => /^es/i.test(voice.lang || ""));
+  return matches.map((choice, index) => {
+    const fallbackVoice = genericSpanishVoices[index] || genericSpanishVoices[0] || voices[0];
+    const available = Boolean(choice.voice);
     return {
       id: choice.id,
       label: choice.label,
-      voice
+      voice: available ? choice.voice : null,
+      fallbackVoice,
+      available
     };
   });
 }
@@ -1050,7 +1049,7 @@ function getSelectedVoiceChoice(progress, voiceChoices) {
     return legacyByURI;
   }
 
-  return voiceChoices[0];
+  return voiceChoices.find((choice) => choice.available) || voiceChoices[0];
 }
 
 function findVoiceByPatterns(voices, langPriorities, namePatterns) {
@@ -1062,18 +1061,7 @@ function findVoiceByPatterns(voices, langPriorities, namePatterns) {
         return matched;
       }
     }
-    if (langVoices.length) {
-      return langVoices[0];
-    }
   }
-
-  for (const pattern of namePatterns) {
-    const matched = voices.find((voice) => new RegExp(pattern, "i").test(voice.name));
-    if (matched) {
-      return matched;
-    }
-  }
-
   return null;
 }
 
