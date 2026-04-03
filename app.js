@@ -96,12 +96,14 @@ const state = {
   flashIndex: 0,
   isFlipped: false,
   quizIndex: 0,
-  quizEntries: []
+  quizEntries: [],
+  availableVoices: []
 };
 
 initialize();
 
 function initialize() {
+  setupVoices();
   resetStudyFlow();
   renderApp();
 }
@@ -126,6 +128,8 @@ function renderApp() {
   const currentWordNote = progress.notes[String(currentWord.id)] || "";
   const isFavoriteWord = progress.favoriteWords.includes(currentWord.id);
   const isReviewWord = progress.reviewWords.includes(currentWord.id);
+  const spanishVoices = getSpanishVoices();
+  const selectedVoiceURI = progress.selectedVoiceURI || getPreferredVoice(spanishVoices)?.voiceURI || "";
 
   app.innerHTML = `
     <div class="app-shell">
@@ -285,6 +289,35 @@ function renderApp() {
         ${state.activeTab === "learn" ? `
           <section class="panel note-side-panel">
             <div class="note-panel note-panel--embedded">
+              <div class="voice-panel">
+                <div class="voice-panel__header">
+                  <div>
+                    <p class="note-panel__eyebrow">발음 설정</p>
+                    <h3>목소리 선택</h3>
+                  </div>
+                  <button class="ghost-button ghost-button--small" data-action="preview-voice" data-word="${escapeAttribute(currentWord.example)}">테스트</button>
+                </div>
+                <label class="voice-label" for="voice-select">스페인어 목소리</label>
+                <select id="voice-select" class="voice-select">
+                  ${spanishVoices.length ? spanishVoices.map((voice) => `
+                    <option value="${escapeAttribute(voice.voiceURI)}" ${selectedVoiceURI === voice.voiceURI ? "selected" : ""}>
+                      ${escapeHtml(voice.name)} (${escapeHtml(voice.lang)})
+                    </option>
+                  `).join("") : `<option value="">사용 가능한 음성을 불러오는 중</option>`}
+                </select>
+                <label class="voice-label" for="voice-rate">말하기 속도</label>
+                <select id="voice-rate" class="voice-select">
+                  ${[
+                    { value: "0.78", label: "천천히" },
+                    { value: "0.88", label: "기본 추천" },
+                    { value: "0.98", label: "조금 빠르게" }
+                  ].map((item) => `
+                    <option value="${item.value}" ${String(progress.speechRate) === item.value ? "selected" : ""}>${item.label}</option>
+                  `).join("")}
+                </select>
+                <p class="voice-hint">브라우저가 지원하는 스페인어 음성 중에서 고를 수 있습니다. 기본 추천은 비교적 또렷한 스페인어 음성을 우선 선택합니다.</p>
+              </div>
+
               <div class="note-panel__header">
                 <div>
                   <p class="note-panel__eyebrow">단어 메모장</p>
@@ -451,9 +484,31 @@ function bindEvents(levelWords, quizWord) {
   document.querySelectorAll("[data-action='speak']").forEach((button) => {
     button.addEventListener("click", (event) => {
       event.stopPropagation();
-      speak(button.dataset.word);
+      speak(button.dataset.word, getActiveProfile().progress);
     });
   });
+
+  bindOptional("[data-action='preview-voice']", "click", () => {
+    speak(currentWord.example, getActiveProfile().progress);
+  });
+
+  const voiceSelect = document.getElementById("voice-select");
+  if (voiceSelect) {
+    voiceSelect.addEventListener("change", () => {
+      const progress = getActiveProfile().progress;
+      progress.selectedVoiceURI = voiceSelect.value;
+      saveDatabase();
+    });
+  }
+
+  const voiceRate = document.getElementById("voice-rate");
+  if (voiceRate) {
+    voiceRate.addEventListener("change", () => {
+      const progress = getActiveProfile().progress;
+      progress.speechRate = Number(voiceRate.value);
+      saveDatabase();
+    });
+  }
 
   bindOptional("[data-action='toggle-favorite']", "click", () => {
     const progress = getActiveProfile().progress;
@@ -647,6 +702,8 @@ function createEmptyProgress() {
     favoriteWords: [],
     reviewWords: [],
     dailyGoal: 5,
+    selectedVoiceURI: "",
+    speechRate: 0.88,
     todayLearned: {
       date: getTodayKey(),
       learnedCount: 0
@@ -677,6 +734,8 @@ function createInitialDatabase() {
           favoriteWords: [2, 8],
           reviewWords: [11],
           dailyGoal: 5,
+          selectedVoiceURI: "",
+          speechRate: 0.88,
           todayLearned: {
             date: getTodayKey(),
             learnedCount: 2
@@ -714,6 +773,8 @@ function normalizeDatabase(db) {
         notes: { ...createEmptyProgress().notes, ...(user.progress?.notes || {}) },
         favoriteWords: [...(user.progress?.favoriteWords || [])],
         reviewWords: [...(user.progress?.reviewWords || [])],
+        selectedVoiceURI: user.progress?.selectedVoiceURI || "",
+        speechRate: user.progress?.speechRate || 0.88,
         todayLearned: user.progress?.todayLearned || { date: getTodayKey(), learnedCount: 0 }
       }
     };
@@ -755,15 +816,59 @@ function toggleWordInList(list, wordId) {
   }
 }
 
-function speak(text) {
+function speak(text, progress) {
   if (!("speechSynthesis" in window)) {
     return;
   }
+
+  const spanishVoices = getSpanishVoices();
+  const selectedVoice = spanishVoices.find((voice) => voice.voiceURI === progress.selectedVoiceURI) || getPreferredVoice(spanishVoices);
   const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = "es-ES";
-  utterance.rate = 0.92;
+  utterance.lang = selectedVoice?.lang || "es-ES";
+  utterance.rate = progress.speechRate || 0.88;
+  utterance.pitch = 1;
+  if (selectedVoice) {
+    utterance.voice = selectedVoice;
+  }
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
+}
+
+function setupVoices() {
+  if (!("speechSynthesis" in window)) {
+    return;
+  }
+
+  const updateVoices = () => {
+    state.availableVoices = window.speechSynthesis.getVoices();
+    renderApp();
+  };
+
+  updateVoices();
+  window.speechSynthesis.onvoiceschanged = updateVoices;
+}
+
+function getSpanishVoices() {
+  const voices = state.availableVoices.length ? state.availableVoices : (("speechSynthesis" in window) ? window.speechSynthesis.getVoices() : []);
+  const spanishVoices = voices.filter((voice) => voice.lang && voice.lang.toLowerCase().startsWith("es"));
+  return spanishVoices.length ? spanishVoices : voices;
+}
+
+function getPreferredVoice(voices) {
+  if (!voices.length) {
+    return null;
+  }
+
+  const priorities = ["es-ES", "es-MX", "es-US", "es"];
+  for (const priority of priorities) {
+    const exact = voices.find((voice) => voice.lang === priority);
+    if (exact) {
+      return exact;
+    }
+  }
+
+  const naturalVoice = voices.find((voice) => /natural|google|microsoft|helena|jorge|paulina|sabina|monica/i.test(voice.name));
+  return naturalVoice || voices[0];
 }
 
 function shuffled(items) {
