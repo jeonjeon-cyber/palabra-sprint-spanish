@@ -267,7 +267,7 @@ function renderApp() {
                   <div class="flashcard__layout">
                     <div class="flashcard__main">
                       <span class="flashcard__label">Spanish</span>
-                      <h3>${escapeHtml(currentWord.spanish)}</h3>
+                      <h3 class="flashcard__title">${escapeHtml(currentWord.spanish)}</h3>
                       <p>${escapeHtml(currentWord.example)}</p>
                       <button class="sound-button" data-action="speak" data-word="${escapeAttribute(currentWord.spanish)}">발음 듣기</button>
                       <span class="card-level-tag">레벨 ${currentWord.difficulty}</span>
@@ -294,7 +294,7 @@ function renderApp() {
                   <div class="flashcard__layout">
                     <div class="flashcard__main">
                       <span class="flashcard__label">Korean</span>
-                      <h3>${escapeHtml(currentWord.korean)}</h3>
+                      <h3 class="flashcard__title flashcard__title--back">${escapeHtml(currentWord.korean)}</h3>
                       <p>${escapeHtml(currentWord.hint)}</p>
                       <span class="difficulty-badge">난이도 ${currentWord.difficulty}</span>
                     </div>
