@@ -253,8 +253,8 @@ function renderApp() {
                 </div>
               </div>
               <div class="word-status-actions">
-                <button class="${isFavoriteWord ? "status-chip is-active" : "status-chip"}" data-action="toggle-favorite">즐겨찾기</button>
-                <button class="${isReviewWord ? "status-chip is-active review" : "status-chip review"}" data-action="toggle-review">복습 필요</button>
+                <button type="button" class="${isFavoriteWord ? "status-chip is-active" : "status-chip"}" data-action="toggle-favorite">즐겨찾기</button>
+                <button type="button" class="${isReviewWord ? "status-chip is-active review" : "status-chip review"}" data-action="toggle-review">복습 필요</button>
               </div>
             </div>
 
@@ -588,20 +588,38 @@ function bindEvents(levelWords, quizWord) {
     });
   }
 
-  bindOptional("[data-action='toggle-favorite']", "click", () => {
-    const progress = getActiveProfile().progress;
-    toggleWordInList(progress.favoriteWords, currentWord.id);
-    setMascotReaction("happy", `좋아, "${currentWord.spanish}"를 즐겨찾기에 넣어둘게!`);
-    saveDatabase();
-    renderApp();
+  document.querySelectorAll("[data-action='toggle-favorite']").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const progress = getActiveProfile().progress;
+      toggleWordInList(progress.favoriteWords, currentWord.id);
+      setMascotReaction(
+        progress.favoriteWords.includes(currentWord.id) ? "happy" : "calm",
+        progress.favoriteWords.includes(currentWord.id)
+          ? `좋아, "${currentWord.spanish}"를 즐겨찾기에 넣어둘게!`
+          : `"${currentWord.spanish}" 즐겨찾기를 해제했어.`
+      );
+      saveDatabase();
+      renderApp();
+    });
   });
 
-  bindOptional("[data-action='toggle-review']", "click", () => {
-    const progress = getActiveProfile().progress;
-    toggleWordInList(progress.reviewWords, currentWord.id);
-    setMascotReaction("thinking", `좋아, "${currentWord.spanish}"는 복습 카드로 챙겨둘게.`);
-    saveDatabase();
-    renderApp();
+  document.querySelectorAll("[data-action='toggle-review']").forEach((button) => {
+    button.addEventListener("click", (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const progress = getActiveProfile().progress;
+      toggleWordInList(progress.reviewWords, currentWord.id);
+      setMascotReaction(
+        progress.reviewWords.includes(currentWord.id) ? "thinking" : "calm",
+        progress.reviewWords.includes(currentWord.id)
+          ? `좋아, "${currentWord.spanish}"는 복습 카드로 챙겨둘게.`
+          : `"${currentWord.spanish}"는 이제 복습 필요 목록에서 뺐어.`
+      );
+      saveDatabase();
+      renderApp();
+    });
   });
 
   bindOptional("[data-action='clear-note']", "click", () => {
