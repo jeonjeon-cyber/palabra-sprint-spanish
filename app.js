@@ -129,7 +129,6 @@ function renderApp() {
   const accuracy = progress.totalAnswers ? Math.round((progress.correctAnswers / progress.totalAnswers) * 100) : 0;
   const levelSpan = currentLevel.maxXp === Infinity ? 120 : currentLevel.maxXp - currentLevel.minXp + 1;
   const levelProgress = Math.max(0, Math.min(100, Math.round(((progress.xp - currentLevel.minXp) / levelSpan) * 100)));
-  const todayProgress = getTodayProgress(progress);
   const currentWordNote = progress.notes[String(currentWord.id)] || "";
   const isFavoriteWord = progress.favoriteWords.includes(currentWord.id);
   const isReviewWord = progress.reviewWords.includes(currentWord.id);
@@ -243,13 +242,6 @@ function renderApp() {
             </div>
 
             <div class="study-toolbar">
-              <div class="goal-card">
-                <span>오늘 목표</span>
-                <strong>${todayProgress.learnedCount} / ${progress.dailyGoal}</strong>
-                <div class="goal-meter">
-                  <div class="goal-meter__fill" style="width: ${Math.min(100, Math.round((todayProgress.learnedCount / progress.dailyGoal) * 100))}%"></div>
-                </div>
-              </div>
               <div class="mascot-card mascot-card--${mascot.tone}">
                 <div class="mascot-face" aria-hidden="true">
                   <span class="mascot-face__eyes">${mascot.eyes}</span>
