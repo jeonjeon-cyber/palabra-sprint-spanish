@@ -129,7 +129,8 @@ function renderApp() {
   const isFavoriteWord = progress.favoriteWords.includes(currentWord.id);
   const isReviewWord = progress.reviewWords.includes(currentWord.id);
   const spanishVoices = getSpanishVoices();
-  const selectedVoiceURI = progress.selectedVoiceURI || getPreferredVoice(spanishVoices)?.voiceURI || "";
+  const voiceChoices = getVoiceChoices(spanishVoices);
+  const selectedVoiceChoice = getSelectedVoiceChoice(progress, voiceChoices);
 
   app.innerHTML = `
     <div class="app-shell">
@@ -299,9 +300,9 @@ function renderApp() {
                 </div>
                 <label class="voice-label" for="voice-select">스페인어 목소리</label>
                 <select id="voice-select" class="voice-select">
-                  ${spanishVoices.length ? spanishVoices.map((voice) => `
-                    <option value="${escapeAttribute(voice.voiceURI)}" ${selectedVoiceURI === voice.voiceURI ? "selected" : ""}>
-                      ${escapeHtml(voice.name)} (${escapeHtml(voice.lang)})
+                  ${voiceChoices.length ? voiceChoices.map((choice) => `
+                    <option value="${escapeAttribute(choice.id)}" ${selectedVoiceChoice.id === choice.id ? "selected" : ""}>
+                      ${escapeHtml(choice.label)}
                     </option>
                   `).join("") : `<option value="">사용 가능한 음성을 불러오는 중</option>`}
                 </select>
@@ -496,7 +497,7 @@ function bindEvents(levelWords, quizWord) {
   if (voiceSelect) {
     voiceSelect.addEventListener("change", () => {
       const progress = getActiveProfile().progress;
-      progress.selectedVoiceURI = voiceSelect.value;
+      progress.selectedVoiceChoice = voiceSelect.value;
       saveDatabase();
     });
   }
@@ -703,6 +704,7 @@ function createEmptyProgress() {
     reviewWords: [],
     dailyGoal: 5,
     selectedVoiceURI: "",
+    selectedVoiceChoice: "",
     speechRate: 0.88,
     todayLearned: {
       date: getTodayKey(),
@@ -735,6 +737,7 @@ function createInitialDatabase() {
           reviewWords: [11],
           dailyGoal: 5,
           selectedVoiceURI: "",
+          selectedVoiceChoice: "",
           speechRate: 0.88,
           todayLearned: {
             date: getTodayKey(),
@@ -774,6 +777,7 @@ function normalizeDatabase(db) {
         favoriteWords: [...(user.progress?.favoriteWords || [])],
         reviewWords: [...(user.progress?.reviewWords || [])],
         selectedVoiceURI: user.progress?.selectedVoiceURI || "",
+        selectedVoiceChoice: user.progress?.selectedVoiceChoice || "",
         speechRate: user.progress?.speechRate || 0.88,
         todayLearned: user.progress?.todayLearned || { date: getTodayKey(), learnedCount: 0 }
       }
@@ -822,7 +826,9 @@ function speak(text, progress) {
   }
 
   const spanishVoices = getSpanishVoices();
-  const selectedVoice = spanishVoices.find((voice) => voice.voiceURI === progress.selectedVoiceURI) || getPreferredVoice(spanishVoices);
+  const voiceChoices = getVoiceChoices(spanishVoices);
+  const selectedChoice = getSelectedVoiceChoice(progress, voiceChoices);
+  const selectedVoice = selectedChoice.voice || getPreferredVoice(spanishVoices);
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.lang = selectedVoice?.lang || "es-ES";
   utterance.rate = progress.speechRate || 0.88;
@@ -869,6 +875,91 @@ function getPreferredVoice(voices) {
 
   const naturalVoice = voices.find((voice) => /natural|google|microsoft|helena|jorge|paulina|sabina|monica/i.test(voice.name));
   return naturalVoice || voices[0];
+}
+
+function getVoiceChoices(voices) {
+  if (!voices.length) {
+    return [];
+  }
+
+  const matches = [
+    {
+      id: "spain-female",
+      label: "스페인 표준 여성 목소리",
+      voice: findVoiceByPatterns(voices, ["es-ES"], ["helena", "monica", "maria", "female", "woman"])
+    },
+    {
+      id: "spain-male",
+      label: "스페인 표준 남성 목소리",
+      voice: findVoiceByPatterns(voices, ["es-ES"], ["jorge", "diego", "male", "man"])
+    },
+    {
+      id: "latam-female",
+      label: "중남미 여성 목소리",
+      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["paulina", "sabina", "female", "woman"])
+    },
+    {
+      id: "latam-male",
+      label: "중남미 남성 목소리",
+      voice: findVoiceByPatterns(voices, ["es-MX", "es-US", "es-AR", "es-CO"], ["male", "man"])
+    }
+  ];
+
+  const fallbackPool = [...voices];
+  return matches.map((choice) => {
+    let voice = choice.voice;
+    if (!voice) {
+      voice = fallbackPool.find((candidate) => !matches.some((item) => item.voice && item.voice.voiceURI === candidate.voiceURI))
+        || fallbackPool[0];
+    }
+    return {
+      id: choice.id,
+      label: choice.label,
+      voice
+    };
+  });
+}
+
+function getSelectedVoiceChoice(progress, voiceChoices) {
+  if (!voiceChoices.length) {
+    return { id: "", label: "", voice: null };
+  }
+
+  const byChoiceId = voiceChoices.find((choice) => choice.id === progress.selectedVoiceChoice);
+  if (byChoiceId) {
+    return byChoiceId;
+  }
+
+  const legacyByURI = voiceChoices.find((choice) => choice.voice && choice.voice.voiceURI === progress.selectedVoiceURI);
+  if (legacyByURI) {
+    return legacyByURI;
+  }
+
+  return voiceChoices[0];
+}
+
+function findVoiceByPatterns(voices, langPriorities, namePatterns) {
+  for (const lang of langPriorities) {
+    const langVoices = voices.filter((voice) => voice.lang === lang);
+    for (const pattern of namePatterns) {
+      const matched = langVoices.find((voice) => new RegExp(pattern, "i").test(voice.name));
+      if (matched) {
+        return matched;
+      }
+    }
+    if (langVoices.length) {
+      return langVoices[0];
+    }
+  }
+
+  for (const pattern of namePatterns) {
+    const matched = voices.find((voice) => new RegExp(pattern, "i").test(voice.name));
+    if (matched) {
+      return matched;
+    }
+  }
+
+  return null;
 }
 
 function shuffled(items) {
