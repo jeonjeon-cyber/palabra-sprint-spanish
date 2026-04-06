@@ -265,9 +265,9 @@ function renderApp() {
             </div>
 
             <article class="${state.isFlipped ? "flashcard is-flipped" : "flashcard"}" id="flashcard">
+              <button class="card-toggle-button" data-action="flip-card">${state.isFlipped ? "앞면 보기" : "뜻 보기"}</button>
               <div class="flashcard__inner">
                 <div class="flashcard__face flashcard__face--front">
-                  <button class="card-toggle-button" data-action="flip-card">뜻 보기</button>
                   <div class="flashcard__layout">
                     <div class="flashcard__main">
                       <span class="flashcard__label">Spanish</span>
@@ -294,7 +294,6 @@ function renderApp() {
                   </div>
                 </div>
                 <div class="flashcard__face flashcard__face--back">
-                  <button class="card-toggle-button" data-action="flip-card">앞면 보기</button>
                   <div class="flashcard__layout">
                     <div class="flashcard__main">
                       <span class="flashcard__label">Korean</span>

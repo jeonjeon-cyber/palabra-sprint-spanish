@@ -321,7 +321,7 @@ button {
   position: absolute;
   top: 18px;
   right: 18px;
-  z-index: 2;
+  z-index: 5;
   padding: 8px 12px;
   background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(104, 81, 42, 0.12);
@@ -359,6 +359,7 @@ button {
   perspective: 1200px;
   min-height: 320px;
   margin-bottom: 20px;
+  position: relative;
 }
 
 .study-toolbar {
@@ -601,6 +602,7 @@ button {
   display: flex;
   padding: 28px;
   border-radius: 26px;
+  -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
   overflow: hidden;
 }
