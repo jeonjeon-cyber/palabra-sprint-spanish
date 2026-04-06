@@ -1,0 +1,70 @@
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="160" y1="48" x2="1040" y2="582" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFF5D9"/>
+      <stop offset="1" stop-color="#FFFDF7"/>
+    </linearGradient>
+    <linearGradient id="card" x1="208" y1="156" x2="964" y2="502" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFFFFF" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#FFF9EF"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="266" y1="190" x2="360" y2="288" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE08B"/>
+      <stop offset="1" stop-color="#FFBF52"/>
+    </linearGradient>
+    <filter id="shadow" x="168" y="122" width="864" height="420" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="16"/>
+      <feGaussianBlur stdDeviation="20"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.57 0 0 0 0 0.45 0 0 0 0 0.18 0 0 0 0.14 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_0_1"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_0_1" result="shape"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" rx="36" fill="url(#bg)"/>
+  <circle cx="150" cy="96" r="120" fill="#FFD76C" fill-opacity="0.35"/>
+  <circle cx="1084" cy="116" r="110" fill="#1D8F6C" fill-opacity="0.12"/>
+  <circle cx="1052" cy="508" r="132" fill="#E84A36" fill-opacity="0.12"/>
+
+  <g filter="url(#shadow)">
+    <rect x="208" y="146" width="784" height="340" rx="34" fill="url(#card)"/>
+  </g>
+
+  <rect x="252" y="190" width="92" height="96" rx="34" fill="url(#accent)"/>
+  <circle cx="285" cy="225" r="8" fill="#4A3520"/>
+  <circle cx="313" cy="225" r="8" fill="#4A3520"/>
+  <path d="M284 252C291 261 306 261 314 252" stroke="#4A3520" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="271" cy="249" r="6" fill="#EA9A7A" fill-opacity="0.32"/>
+  <circle cx="327" cy="249" r="6" fill="#EA9A7A" fill-opacity="0.32"/>
+
+  <text x="378" y="240" fill="#1D1A16" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="62" font-weight="800">Palabra Sprint</text>
+  <text x="378" y="296" fill="#316D5A" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="28" font-weight="700">스페인어 단어 퀴즈 · 예문 · 발음 · 메모</text>
+  <text x="378" y="350" fill="#6C665E" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="28" font-weight="500">듀오링고처럼 가볍고 재미있게,</text>
+  <text x="378" y="390" fill="#6C665E" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="28" font-weight="500">카드 학습과 퀴즈로 스페인어를 익혀보세요.</text>
+
+  <g>
+    <rect x="252" y="336" width="148" height="54" rx="27" fill="#EAF5EF"/>
+    <text x="287" y="370" fill="#245B48" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="24" font-weight="800">발음 듣기</text>
+  </g>
+
+  <g>
+    <rect x="418" y="336" width="132" height="54" rx="27" fill="#FFF0C8"/>
+    <text x="458" y="370" fill="#7A5200" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="24" font-weight="800">퀴즈</text>
+  </g>
+
+  <g>
+    <rect x="568" y="336" width="152" height="54" rx="27" fill="#F3EFE6"/>
+    <text x="611" y="370" fill="#5D5347" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="24" font-weight="800">예문 학습</text>
+  </g>
+
+  <g transform="translate(808 180)">
+    <rect width="122" height="86" rx="16" fill="#C60B1E"/>
+    <rect y="22" width="122" height="42" fill="#FFC400"/>
+    <rect x="26" y="26" width="18" height="34" rx="6" fill="#B32821" fill-opacity="0.35"/>
+    <circle cx="35" cy="43" r="5" fill="#B32821" fill-opacity="0.45"/>
+  </g>
+
+  <text x="252" y="448" fill="#6C665E" font-family="'Plus Jakarta Sans', 'Segoe UI', sans-serif" font-size="22" font-weight="600">https://jeonjeon-cyber.github.io/palabra-sprint-spanish/</text>
+</svg>
