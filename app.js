@@ -91,8 +91,8 @@ const LEVELS = [
 const STORAGE_KEY = "palabra-sprint-db";
 const state = {
   db: loadDatabase(),
-  activeTab: "learn",
-  learnScreen: "card",
+  activeTab: "profile",
+  learnScreen: "overview",
   selectedLevel: null,
   flashIndex: 0,
   isFlipped: false,
@@ -160,9 +160,8 @@ function renderApp() {
             사용자별 기록, 레벨업, 발음 재생까지 한 화면에서 자연스럽게 이어집니다.
           </p>
           <div class="tab-row">
-            <button class="${state.activeTab === "learn" ? "tab-button is-active" : "tab-button"}" data-action="tab" data-tab="learn">학습</button>
-            <button class="${state.activeTab === "quiz" ? "tab-button is-active" : "tab-button"}" data-action="tab" data-tab="quiz">퀴즈</button>
             <button class="${state.activeTab === "profile" ? "tab-button is-active" : "tab-button"}" data-action="tab" data-tab="profile">프로필</button>
+            <button class="${state.activeTab === "learn" ? "tab-button is-active" : "tab-button"}" data-action="tab" data-tab="learn">학습</button>
           </div>
         </div>
         <div class="hero__stats">
@@ -248,10 +247,40 @@ function renderApp() {
               </div>
             </div>
             <div class="learn-screen-tabs">
+              <button class="${state.learnScreen === "overview" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="overview">학습</button>
               <button class="${state.learnScreen === "card" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="card">카드</button>
               <button class="${state.learnScreen === "example" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="example">예문</button>
               <button class="${state.learnScreen === "note" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="note">메모</button>
               <button class="${state.learnScreen === "wordbank" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="wordbank">단어장</button>
+              <button class="${state.learnScreen === "quiz" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="quiz">퀴즈</button>
+            </div>
+          </section>
+        ` : ""}
+
+        ${state.activeTab === "learn" && state.learnScreen === "overview" ? `
+          <section class="panel panel--wide">
+            <div class="panel__header">
+              <div>
+                <p class="panel__eyebrow">Study Home</p>
+                <h2>학습 시작 화면</h2>
+              </div>
+            </div>
+            <div class="learn-overview-grid">
+              <button class="learn-overview-card" data-action="set-learn-screen" data-screen="card">
+                <span class="learn-overview-card__eyebrow">Step 1</span>
+                <strong>카드 학습</strong>
+                <span>${escapeHtml(currentWord.spanish)} 단어부터 바로 외워보세요.</span>
+              </button>
+              <button class="learn-overview-card" data-action="set-learn-screen" data-screen="example">
+                <span class="learn-overview-card__eyebrow">Step 2</span>
+                <strong>예문 보기</strong>
+                <span>실제 문장에서 어떻게 쓰이는지 확인해보세요.</span>
+              </button>
+              <button class="learn-overview-card" data-action="set-learn-screen" data-screen="note">
+                <span class="learn-overview-card__eyebrow">Step 3</span>
+                <strong>메모 정리</strong>
+                <span>헷갈리는 점이나 나만의 암기법을 남겨보세요.</span>
+              </button>
             </div>
           </section>
         ` : ""}
@@ -430,7 +459,7 @@ function renderApp() {
           </section>
         ` : ""}
 
-        ${state.activeTab === "quiz" ? `
+        ${state.activeTab === "learn" && state.learnScreen === "quiz" ? `
           <section class="panel">
             <div class="panel__header">
               <div>
@@ -524,11 +553,17 @@ function renderApp() {
 }
 
 function bindEvents(levelWords, quizWord) {
-  document.getElementById("profile-form").addEventListener("submit", handleCreateProfile);
+  const profileForm = document.getElementById("profile-form");
+  if (profileForm) {
+    profileForm.addEventListener("submit", handleCreateProfile);
+  }
 
   document.querySelectorAll("[data-action='tab']").forEach((button) => {
     button.addEventListener("click", () => {
       state.activeTab = button.dataset.tab;
+      if (button.dataset.tab === "learn") {
+        state.learnScreen = "overview";
+      }
       renderApp();
     });
   });
@@ -543,6 +578,8 @@ function bindEvents(levelWords, quizWord) {
   document.querySelectorAll("[data-action='switch-profile']").forEach((button) => {
     button.addEventListener("click", () => {
       state.db.activeUserId = button.dataset.userId;
+      state.activeTab = "learn";
+      state.learnScreen = "overview";
       state.selectedLevel = null;
       saveDatabase();
       resetStudyFlow();
@@ -801,6 +838,8 @@ function handleCreateProfile(event) {
     progress: createEmptyProgress()
   };
   state.db.activeUserId = userId;
+  state.activeTab = "learn";
+  state.learnScreen = "overview";
   state.selectedLevel = null;
   saveDatabase();
   resetStudyFlow();
