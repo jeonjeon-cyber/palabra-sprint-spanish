@@ -92,6 +92,7 @@ const STORAGE_KEY = "palabra-sprint-db";
 const state = {
   db: loadDatabase(),
   activeTab: "learn",
+  learnScreen: "card",
   selectedLevel: null,
   flashIndex: 0,
   isFlipped: false,
@@ -184,6 +185,7 @@ function renderApp() {
       </header>
 
       <main class="dashboard">
+        ${state.activeTab === "profile" ? `
         <section class="panel panel--wide">
           <div class="panel__header">
             <div>
@@ -235,8 +237,26 @@ function renderApp() {
             </form>
           </div>
         </section>
+        ` : ""}
 
-        ${state.activeTab !== "quiz" ? `
+        ${state.activeTab === "learn" ? `
+          <section class="panel panel--wide learn-hub">
+            <div class="panel__header">
+              <div>
+                <p class="panel__eyebrow">Study Flow</p>
+                <h2>학습 화면 전환</h2>
+              </div>
+            </div>
+            <div class="learn-screen-tabs">
+              <button class="${state.learnScreen === "card" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="card">카드</button>
+              <button class="${state.learnScreen === "example" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="example">예문</button>
+              <button class="${state.learnScreen === "note" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="note">메모</button>
+              <button class="${state.learnScreen === "wordbank" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="wordbank">단어장</button>
+            </div>
+          </section>
+        ` : ""}
+
+        ${state.activeTab === "learn" && state.learnScreen === "card" ? `
           <section class="panel panel--featured">
             <div class="panel__header">
               <div>
@@ -325,6 +345,17 @@ function renderApp() {
               <button class="secondary-button" data-action="mark-known">외웠어요 +12XP</button>
               <button class="ghost-button" data-action="next-flashcard">다음 단어</button>
             </div>
+          </section>
+        ` : ""}
+
+        ${state.activeTab === "learn" && state.learnScreen === "example" ? `
+          <section class="panel panel--wide">
+            <div class="panel__header">
+              <div>
+                <p class="panel__eyebrow">Real Example</p>
+                <h2>${escapeHtml(currentWord.spanish)} 실전 예문</h2>
+              </div>
+            </div>
             <div class="example-panel">
               <div class="example-panel__header">
                 <p class="example-panel__eyebrow">실전 예문</p>
@@ -344,7 +375,7 @@ function renderApp() {
           </section>
         ` : ""}
 
-        ${state.activeTab === "learn" ? `
+        ${state.activeTab === "learn" && state.learnScreen === "note" ? `
           <section class="panel note-side-panel">
             <div class="note-panel note-panel--embedded">
               <div class="voice-panel">
@@ -399,7 +430,7 @@ function renderApp() {
           </section>
         ` : ""}
 
-        ${state.activeTab !== "learn" ? `
+        ${state.activeTab === "quiz" ? `
           <section class="panel">
             <div class="panel__header">
               <div>
@@ -431,6 +462,7 @@ function renderApp() {
           </section>
         ` : ""}
 
+        ${state.activeTab === "learn" && state.learnScreen === "wordbank" ? `
         <section class="panel panel--wide">
           <div class="panel__header">
             <div>
@@ -483,6 +515,7 @@ function renderApp() {
             </div>
           </div>
         </section>
+        ` : ""}
       </main>
     </div>
   `;
@@ -496,6 +529,13 @@ function bindEvents(levelWords, quizWord) {
   document.querySelectorAll("[data-action='tab']").forEach((button) => {
     button.addEventListener("click", () => {
       state.activeTab = button.dataset.tab;
+      renderApp();
+    });
+  });
+
+  document.querySelectorAll("[data-action='set-learn-screen']").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.learnScreen = button.dataset.screen;
       renderApp();
     });
   });
