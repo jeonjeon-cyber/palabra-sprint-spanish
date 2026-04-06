@@ -116,6 +116,7 @@ function initialize() {
 }
 
 function renderApp() {
+  persistRenderedNoteDraft();
   const app = document.getElementById("app");
   const activeProfile = getActiveProfile();
   const progress = activeProfile ? activeProfile.progress : createEmptyProgress();
@@ -385,6 +386,7 @@ function renderApp() {
               </div>
               <textarea
                 id="word-note"
+                data-word-id="${currentWord.id}"
                 class="note-textarea"
                 placeholder="여기에 직접 적어보세요. 뜻, 헷갈리는 포인트, 나만의 예문을 남길 수 있어요."
               >${escapeHtml(currentWordNote)}</textarea>
@@ -805,6 +807,22 @@ function bindOptional(selector, eventName, handler) {
   if (element) {
     element.addEventListener(eventName, handler);
   }
+}
+
+function persistRenderedNoteDraft() {
+  const textarea = document.getElementById("word-note");
+  const profile = getActiveProfile();
+  if (!textarea || !profile) {
+    return;
+  }
+
+  const wordId = textarea.dataset.wordId;
+  if (!wordId) {
+    return;
+  }
+
+  profile.progress.notes[String(wordId)] = textarea.value;
+  saveDatabase();
 }
 
 function setupGlobalHandlers() {
