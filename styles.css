@@ -847,6 +847,58 @@ button {
   margin-top: 16px;
 }
 
+.study-example-side {
+  align-self: start;
+}
+
+.study-example-list {
+  display: grid;
+  gap: 14px;
+}
+
+.study-example-card {
+  padding: 20px;
+  border-radius: 22px;
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(252, 247, 239, 0.96));
+}
+
+.study-example-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.study-example-card__header h3 {
+  margin: 4px 0 0;
+  font-size: 1.15rem;
+}
+
+.study-example-card__eyebrow {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary-dark);
+}
+
+.study-example-card__sentence {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+.study-example-card__translation {
+  margin: 0 0 14px;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
 .example-panel__header {
   display: flex;
   align-items: center;

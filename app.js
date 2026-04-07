@@ -148,6 +148,7 @@ function renderApp() {
   const mascot = getMascotState(state.mascotMood);
   const frontTitleSize = getFlashcardTitleSize(currentWord.spanish);
   const backTitleSize = getFlashcardTitleSize(currentWord.korean, true);
+  const studyExamples = getStudyExamples(currentWord);
 
   app.innerHTML = `
     <div class="app-shell">
@@ -373,6 +374,38 @@ function renderApp() {
               <button class="ghost-button" data-action="prev-flashcard">이전 단어</button>
               <button class="secondary-button" data-action="mark-known">외웠어요 +12XP</button>
               <button class="ghost-button" data-action="next-flashcard">다음 단어</button>
+            </div>
+          </section>
+
+          <section class="panel study-example-side">
+            <div class="panel__header">
+              <div>
+                <p class="panel__eyebrow">Example Lab</p>
+                <h2>예문 2개로 복습</h2>
+              </div>
+            </div>
+            <div class="study-example-list">
+              ${studyExamples.map((example, index) => `
+                <article class="study-example-card">
+                  <div class="study-example-card__header">
+                    <div>
+                      <p class="study-example-card__eyebrow">${index === 0 ? "기본 예문" : "복습 예문"}</p>
+                      <h3>${escapeHtml(currentWord.spanish)}</h3>
+                    </div>
+                    <button class="sound-button sound-button--small" data-action="speak" data-word="${escapeAttribute(example.sentence)}">듣기</button>
+                  </div>
+                  <p class="study-example-card__sentence">${escapeHtml(example.sentence)}</p>
+                  <p class="study-example-card__translation">${escapeHtml(example.translation)}</p>
+                  <div class="example-glossary">
+                    ${example.glossary.map((item) => `
+                      <span class="example-glossary__item">
+                        <strong>${escapeHtml(item.word)}</strong>
+                        <span>${escapeHtml(item.meaning)}</span>
+                      </span>
+                    `).join("")}
+                  </div>
+                </article>
+              `).join("")}
             </div>
           </section>
         ` : ""}
@@ -1160,6 +1193,40 @@ function getFlashcardTitleSize(text, isBack = false) {
   const reduction = isBack ? 0.16 : 0.28;
   const size = baseSize - Math.max(0, length - 4) * reduction;
   return `${Math.max(minSize, size).toFixed(2)}rem`;
+}
+
+function getStudyExamples(word) {
+  const baseExample = {
+    sentence: word.example,
+    translation: word.exampleKo,
+    glossary: word.exampleWords
+  };
+
+  const reviewExample = {
+    sentence: buildReviewSentence(word),
+    translation: buildReviewTranslation(word),
+    glossary: buildReviewGlossary(word)
+  };
+
+  return [baseExample, reviewExample];
+}
+
+function buildReviewSentence(word) {
+  return `Hoy practico la palabra "${word.spanish}" en una frase corta.`;
+}
+
+function buildReviewTranslation(word) {
+  return `오늘은 "${word.korean}" 단어를 짧은 문장 안에서 다시 연습해요.`;
+}
+
+function buildReviewGlossary(word) {
+  return [
+    { word: "hoy", meaning: "오늘" },
+    { word: "practico", meaning: "연습한다" },
+    { word: "la palabra", meaning: "그 단어" },
+    { word: word.spanish, meaning: word.korean },
+    { word: "frase corta", meaning: "짧은 문장" }
+  ];
 }
 
 function setMascotReaction(mood, message) {
