@@ -1319,31 +1319,326 @@ function getStudyExamples(word) {
     glossary: word.exampleWords
   };
 
-  const reviewExample = {
-    sentence: buildReviewSentence(word),
-    translation: buildReviewTranslation(word),
-    glossary: buildReviewGlossary(word)
-  };
+  const reviewExample = getReviewExample(word);
 
   return [baseExample, reviewExample];
 }
 
+const REVIEW_EXAMPLE_OVERRIDES = {
+  tiempo: {
+    sentence: "No tengo tiempo ahora.",
+    translation: "지금은 시간이 없어.",
+    glossary: [["no", "아니다, ~않다"], ["tengo", "나는 가지고 있다"], ["tiempo", "시간"], ["ahora", "지금"]]
+  },
+  musica: {
+    sentence: "Escucho música en el bus.",
+    translation: "나는 버스에서 음악을 들어.",
+    glossary: [["escucho", "듣는다"], ["música", "음악"], ["en", "~에, ~에서"], ["el", "그, 정관사"], ["bus", "버스"]]
+  },
+  tarde: {
+    sentence: "Regreso a casa por la tarde.",
+    translation: "나는 오후에 집에 돌아가.",
+    glossary: [["regreso", "돌아간다"], ["a", "~로"], ["casa", "집"], ["por", "~에"], ["la", "그, 정관사"], ["tarde", "오후"]]
+  },
+  experiencia: {
+    sentence: "Fue una experiencia muy especial.",
+    translation: "그건 아주 특별한 경험이었어.",
+    glossary: [["fue", "~였다"], ["una", "하나의, 한"], ["experiencia", "경험"], ["muy", "매우"], ["especial", "특별한"]]
+  },
+  oportunidad: {
+    sentence: "Es una buena oportunidad para empezar.",
+    translation: "시작하기에 좋은 기회야.",
+    glossary: [["es", "~이다"], ["una", "하나의, 한"], ["buena", "좋은"], ["oportunidad", "기회"], ["para", "~하기에"], ["empezar", "시작하다"]]
+  },
+  inicio: {
+    sentence: "Este es solo el inicio.",
+    translation: "이건 시작일 뿐이야.",
+    glossary: [["este", "이"], ["es", "~이다"], ["solo", "단지"], ["el", "그, 정관사"], ["inicio", "시작"]]
+  },
+  viaje: {
+    sentence: "El viaje fue muy tranquilo.",
+    translation: "그 여행은 아주 편안했어.",
+    glossary: [["el", "그, 정관사"], ["viaje", "여행"], ["fue", "~였다"], ["muy", "매우"], ["tranquilo", "편안한"]]
+  },
+  lluvia: {
+    sentence: "Parece que habrá lluvia hoy.",
+    translation: "오늘은 비가 올 것 같아.",
+    glossary: [["parece", "보인다"], ["que", "~라는 것"], ["habrá", "있을 것이다"], ["lluvia", "비"], ["hoy", "오늘"]]
+  },
+  cancion: {
+    sentence: "Esta canción me gusta mucho.",
+    translation: "이 노래가 정말 마음에 들어.",
+    glossary: [["esta", "이"], ["canción", "노래"], ["me", "나에게"], ["gusta", "마음에 든다"], ["mucho", "많이"]]
+  },
+  radio: {
+    sentence: "Escucho la radio por la mañana.",
+    translation: "나는 아침에 라디오를 들어.",
+    glossary: [["escucho", "듣는다"], ["la", "그, 정관사"], ["radio", "라디오"], ["por", "~에"], ["la", "그, 정관사"], ["mañana", "아침"]]
+  },
+  mercado: {
+    sentence: "Compro fruta en el mercado.",
+    translation: "나는 시장에서 과일을 사.",
+    glossary: [["compro", "산다"], ["fruta", "과일"], ["en", "~에, ~에서"], ["el", "그, 정관사"], ["mercado", "시장"]]
+  },
+  jardín: {
+    sentence: "Descansamos un rato en el jardín.",
+    translation: "우리는 정원에서 잠깐 쉬어.",
+    glossary: [["descansamos", "우리는 쉰다"], ["un", "하나의, 한"], ["rato", "잠깐"], ["en", "~에, ~에서"], ["el", "그, 정관사"], ["jardín", "정원"]]
+  },
+  reserva: {
+    sentence: "Tengo una reserva para las siete.",
+    translation: "나는 7시에 예약이 있어.",
+    glossary: [["tengo", "나는 가지고 있다"], ["una", "하나의, 한"], ["reserva", "예약"], ["para", "~를 위해"], ["las", "그, 정관사 복수"], ["siete", "일곱"]]
+  },
+  boleto: {
+    sentence: "Guardo el boleto en la mochila.",
+    translation: "나는 표를 가방에 넣어 둬.",
+    glossary: [["guardo", "보관한다"], ["el", "그, 정관사"], ["boleto", "표"], ["en", "~에"], ["la", "그, 정관사"], ["mochila", "가방"]]
+  },
+  retraso: {
+    sentence: "El tren tiene retraso hoy.",
+    translation: "오늘 기차가 지연돼.",
+    glossary: [["el", "그, 정관사"], ["tren", "기차"], ["tiene", "가지고 있다"], ["retraso", "지연"], ["hoy", "오늘"]]
+  },
+  reunion: {
+    sentence: "La reunión empieza a las nueve.",
+    translation: "회의는 9시에 시작해.",
+    glossary: [["la", "그, 정관사"], ["reunión", "회의"], ["empieza", "시작한다"], ["a", "~에"], ["las", "그, 정관사 복수"], ["nueve", "아홉"]]
+  },
+  proyecto: {
+    sentence: "El proyecto avanza bastante bien.",
+    translation: "프로젝트가 꽤 잘 진행되고 있어.",
+    glossary: [["el", "그, 정관사"], ["proyecto", "프로젝트"], ["avanza", "진행된다"], ["bastante", "꽤"], ["bien", "잘"]]
+  },
+  horario: {
+    sentence: "Reviso mi horario otra vez.",
+    translation: "나는 내 일정을 다시 확인해.",
+    glossary: [["reviso", "확인한다"], ["mi", "나의"], ["horario", "일정"], ["otra", "다른, 또 한 번"], ["vez", "번"]]
+  },
+  documento: {
+    sentence: "Abro el documento ahora mismo.",
+    translation: "나는 지금 바로 문서를 열어.",
+    glossary: [["abro", "연다"], ["el", "그, 정관사"], ["documento", "문서"], ["ahora", "지금"], ["mismo", "바로"]]
+  },
+  recorrido: {
+    sentence: "El recorrido dura una hora.",
+    translation: "그 경로는 한 시간 걸려.",
+    glossary: [["el", "그, 정관사"], ["recorrido", "경로"], ["dura", "지속된다"], ["una", "하나의, 한"], ["hora", "시간"]]
+  },
+  acuerdo: {
+    sentence: "Llegamos a un acuerdo rápido.",
+    translation: "우리는 빠르게 합의했어.",
+    glossary: [["llegamos", "도달했다"], ["a", "~에"], ["un", "하나의, 한"], ["acuerdo", "합의"], ["rápido", "빠른"]]
+  },
+  detalle: {
+    sentence: "Este detalle es importante.",
+    translation: "이 세부사항은 중요해.",
+    glossary: [["este", "이"], ["detalle", "세부사항"], ["es", "~이다"], ["importante", "중요한"]]
+  },
+  consejo: {
+    sentence: "Gracias por tu consejo.",
+    translation: "조언해줘서 고마워.",
+    glossary: [["gracias", "고마워"], ["por", "~에 대해"], ["tu", "너의"], ["consejo", "조언"]]
+  },
+  desafio: {
+    sentence: "Este desafío me motiva mucho.",
+    translation: "이 도전은 나에게 큰 동기를 줘.",
+    glossary: [["este", "이"], ["desafío", "도전"], ["me", "나에게"], ["motiva", "동기를 준다"], ["mucho", "많이"]]
+  },
+  crecimiento: {
+    sentence: "Veo crecimiento cada mes.",
+    translation: "나는 매달 성장을 느껴.",
+    glossary: [["veo", "본다"], ["crecimiento", "성장"], ["cada", "각각의"], ["mes", "달"]]
+  },
+  objetivo: {
+    sentence: "Mi objetivo es hablar mejor.",
+    translation: "내 목표는 더 잘 말하는 거야.",
+    glossary: [["mi", "나의"], ["objetivo", "목표"], ["es", "~이다"], ["hablar", "말하다"], ["mejor", "더 잘"]]
+  },
+  estrategia: {
+    sentence: "Necesitamos otra estrategia.",
+    translation: "우리에겐 다른 전략이 필요해.",
+    glossary: [["necesitamos", "우리는 필요하다"], ["otra", "다른"], ["estrategia", "전략"]]
+  },
+  negociacion: {
+    sentence: "La negociación fue larga.",
+    translation: "협상은 길었어.",
+    glossary: [["la", "그, 정관사"], ["negociación", "협상"], ["fue", "~였다"], ["larga", "긴"]]
+  },
+  confianza: {
+    sentence: "Tengo más confianza ahora.",
+    translation: "이제 더 자신감이 생겼어.",
+    glossary: [["tengo", "나는 가지고 있다"], ["más", "더"], ["confianza", "자신감"], ["ahora", "지금"]]
+  },
+  entorno: {
+    sentence: "Este entorno es muy tranquilo.",
+    translation: "이 환경은 아주 차분해.",
+    glossary: [["este", "이"], ["entorno", "환경"], ["es", "~이다"], ["muy", "매우"], ["tranquilo", "차분한"]]
+  },
+  propuesta: {
+    sentence: "Tu propuesta parece interesante.",
+    translation: "네 제안은 흥미로워 보여.",
+    glossary: [["tu", "너의"], ["propuesta", "제안"], ["parece", "보인다"], ["interesante", "흥미로운"]]
+  },
+  colaboracion: {
+    sentence: "La colaboración salió muy bien.",
+    translation: "협업이 아주 잘 됐어.",
+    glossary: [["la", "그, 정관사"], ["colaboración", "협업"], ["salió", "결과가 나왔다"], ["muy", "매우"], ["bien", "잘"]]
+  },
+  recurso: {
+    sentence: "Este recurso me ayuda mucho.",
+    translation: "이 자료가 큰 도움이 돼.",
+    glossary: [["este", "이"], ["recurso", "자료, 자원"], ["me", "나에게"], ["ayuda", "도움이 된다"], ["mucho", "많이"]]
+  },
+  analisis: {
+    sentence: "El análisis fue muy útil.",
+    translation: "분석이 아주 유익했어.",
+    glossary: [["el", "그, 정관사"], ["análisis", "분석"], ["fue", "~였다"], ["muy", "매우"], ["útil", "유익한"]]
+  },
+  solucion: {
+    sentence: "Esa solución funciona bien.",
+    translation: "그 해결책은 잘 통하네.",
+    glossary: [["esa", "그"], ["solución", "해결책"], ["funciona", "작동한다, 통한다"], ["bien", "잘"]]
+  }
+};
+
+const FEELING_REVIEW_WORDS = new Set(["feliz", "triste", "contento", "cansado", "alegre", "tranquilo", "nervioso", "orgulloso", "preocupado", "seguro"]);
+const ROOM_STATE_REVIEW_WORDS = new Set(["frio", "caliente", "limpio", "sucio", "oscuro", "claro"]);
+const PLACE_REVIEW_WORDS = new Set(["casa", "escuela", "ciudad", "calle", "oficina", "mercado", "jardin", "aeropuerto", "alojamiento"]);
+const FOOD_REVIEW_WORDS = new Set(["agua", "pan", "leche", "cafe", "comida", "desayuno"]);
+const PERSON_REVIEW_WORDS = new Set(["amigo", "familia", "hermano", "hermana", "madre", "padre", "abuela"]);
+const OBJECT_REVIEW_WORDS = new Set(["libro", "mesa", "silla", "puerta", "ventana", "perro", "gato", "telefono", "mochila", "radio", "zapato", "documento", "boleto", "equipaje"]);
+const GENERAL_ADJECTIVE_REVIEW_WORDS = new Set(["rapido", "dificil", "facil", "importante", "amable", "caliente", "frio", "oscuro", "claro", "fuerte", "limpio", "sucio", "necesario", "disponible", "extranjero", "sostenible", "complejo", "eficiente", "constante", "preciso", "probable"]);
+
 function buildReviewSentence(word) {
-  return `Hoy practico la palabra "${word.spanish}" en una frase corta.`;
+  return getReviewExample(word).sentence;
 }
 
 function buildReviewTranslation(word) {
-  return `오늘은 "${word.korean}" 단어를 짧은 문장 안에서 다시 연습해요.`;
+  return getReviewExample(word).translation;
 }
 
 function buildReviewGlossary(word) {
-  return [
-    { word: "hoy", meaning: "오늘" },
-    { word: "practico", meaning: "연습한다" },
-    { word: "la palabra", meaning: "그 단어" },
-    { word: word.spanish, meaning: word.korean },
-    { word: "frase corta", meaning: "짧은 문장" }
-  ];
+  return getReviewExample(word).glossary;
+}
+
+function getReviewExample(word) {
+  const key = normalizeSpanishKey(word.spanish);
+  const override = REVIEW_EXAMPLE_OVERRIDES[key];
+  if (override) {
+    return normalizeReviewExample(override);
+  }
+
+  if (key.endsWith("mente")) {
+    return normalizeReviewExample({
+      sentence: `Ella habla ${word.spanish} en español.`,
+      translation: `그녀는 스페인어로 ${word.korean} 말해.`,
+      glossary: [["ella", "그녀"], ["habla", "말한다"], [word.spanish, word.korean], ["en", "~로"], ["español", "스페인어"]]
+    });
+  }
+
+  if (key.endsWith("ar") || key.endsWith("er") || key.endsWith("ir")) {
+    return normalizeReviewExample({
+      sentence: `Mañana quiero ${word.spanish}.`,
+      translation: `나는 내일 이 표현을 직접 써보고 싶어.`,
+      glossary: [["mañana", "내일"], ["quiero", "원한다"], [word.spanish, word.korean]]
+    });
+  }
+
+  if (word.category === "감정" || FEELING_REVIEW_WORDS.has(key)) {
+    return normalizeReviewExample({
+      sentence: `Hoy me siento ${word.spanish}.`,
+      translation: `오늘 나는 ${word.korean} 기분이야.`,
+      glossary: [["hoy", "오늘"], ["me siento", "나는 ~한 기분이다"], [word.spanish, word.korean]]
+    });
+  }
+
+  if (ROOM_STATE_REVIEW_WORDS.has(key)) {
+    return normalizeReviewExample({
+      sentence: `El cuarto está ${word.spanish} hoy.`,
+      translation: `오늘 방이 ${word.korean}.`,
+      glossary: [["el", "그, 정관사"], ["cuarto", "방"], ["está", "~한 상태다"], [word.spanish, word.korean], ["hoy", "오늘"]]
+    });
+  }
+
+  if (word.category === "형용사" || GENERAL_ADJECTIVE_REVIEW_WORDS.has(key)) {
+    return normalizeReviewExample({
+      sentence: `El plan parece ${word.spanish}.`,
+      translation: `그 계획은 ${word.korean} 보여.`,
+      glossary: [["el", "그, 정관사"], ["plan", "계획"], ["parece", "보인다"], [word.spanish, word.korean]]
+    });
+  }
+
+  if (word.category === "음식" || FOOD_REVIEW_WORDS.has(key)) {
+    return normalizeReviewExample({
+      sentence: `Quiero comprar ${word.spanish} hoy.`,
+      translation: `나는 오늘 ${word.korean} 사고 싶어.`,
+      glossary: [["quiero", "원한다"], ["comprar", "사다"], [word.spanish, word.korean], ["hoy", "오늘"]]
+    });
+  }
+
+  if (word.category === "사람" || PERSON_REVIEW_WORDS.has(key)) {
+    return normalizeReviewExample({
+      sentence: `Hoy veo a mi ${word.spanish}.`,
+      translation: `나는 오늘 내 ${word.korean} 만나.`,
+      glossary: [["hoy", "오늘"], ["veo", "본다, 만난다"], ["a", "~를"], ["mi", "나의"], [word.spanish, word.korean]]
+    });
+  }
+
+  if (word.category === "장소" || PLACE_REVIEW_WORDS.has(key)) {
+    const placePhrase = key === "casa" ? "casa" : `${getSpanishArticle(key)} ${word.spanish}`;
+    return normalizeReviewExample({
+      sentence: `Estoy en ${placePhrase} ahora.`,
+      translation: `나는 지금 ${word.korean}에 있어.`,
+      glossary: key === "casa"
+        ? [["estoy", "나는 ~한 상태다"], ["en", "~에, ~에서"], ["casa", "집"], ["ahora", "지금"]]
+        : [["estoy", "나는 ~한 상태다"], ["en", "~에, ~에서"], [getSpanishArticle(key), "그, 정관사"], [word.spanish, word.korean], ["ahora", "지금"]]
+    });
+  }
+
+  if (word.category === "사물" || OBJECT_REVIEW_WORDS.has(key)) {
+    const article = getSpanishArticle(key);
+    return normalizeReviewExample({
+      sentence: `${capitalize(article)} ${word.spanish} está aquí.`,
+      translation: `${word.korean}가 여기 있어.`,
+      glossary: [[article, "그, 정관사"], [word.spanish, word.korean], ["está", "있다"], ["aquí", "여기"]]
+    });
+  }
+
+  return normalizeReviewExample({
+    sentence: `Pienso mucho en ${word.spanish} hoy.`,
+    translation: `오늘은 ${word.korean}에 대해 많이 생각해.`,
+    glossary: [["pienso", "생각한다"], ["mucho", "많이"], ["en", "~에 대해"], [word.spanish, word.korean], ["hoy", "오늘"]]
+  });
+}
+
+function normalizeReviewExample(example) {
+  return {
+    sentence: example.sentence,
+    translation: example.translation,
+    glossary: example.glossary.map(([itemWord, meaning]) => ({ word: itemWord, meaning }))
+  };
+}
+
+function getSpanishArticle(lowerWord) {
+  if (lowerWord === "agua") {
+    return "el";
+  }
+  if (/(a|ción|sión|dad|tad|umbre)$/i.test(lowerWord)) {
+    return "la";
+  }
+  return "el";
+}
+
+function normalizeSpanishKey(text) {
+  return text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function capitalize(text) {
+  return text.charAt(0).toUpperCase() + text.slice(1);
 }
 
 function setMascotReaction(mood, message) {
