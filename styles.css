@@ -461,6 +461,7 @@ button {
   grid-template-columns: minmax(0, 1.36fr) minmax(360px, 0.94fr);
   gap: 24px;
   align-items: start;
+  grid-column: 1 / -1;
 }
 
 .study-card-layout > .panel,

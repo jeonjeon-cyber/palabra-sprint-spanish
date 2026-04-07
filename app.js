@@ -305,7 +305,7 @@ function renderApp() {
         ` : ""}
 
         ${state.activeTab === "learn" && state.learnScreen === "card" ? `
-          <div class="study-card-layout">
+          <div class="study-card-layout panel--wide">
           <section class="panel panel--featured">
             <div class="panel__header">
               <div>
