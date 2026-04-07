@@ -1,4 +1,4 @@
-const WORDS = [
+const BASE_WORDS = [
   { id: 1, spanish: "hola", korean: "안녕", hint: "가장 기본적인 인사", example: "Hola, ¿cómo estás?", exampleKo: "안녕, 어떻게 지내?", exampleWords: [{ word: "hola", meaning: "안녕" }, { word: "cómo", meaning: "어떻게" }, { word: "estás", meaning: "너는 지내고 있다" }], category: "기본", difficulty: 1 },
   { id: 2, spanish: "gracias", korean: "고마워", hint: "감사를 표현할 때", example: "Muchas gracias por tu ayuda.", exampleKo: "도와줘서 정말 고마워.", exampleWords: [{ word: "muchas", meaning: "정말 많은, 매우" }, { word: "gracias", meaning: "감사, 고마워" }, { word: "por", meaning: "~때문에, ~에 대해" }, { word: "tu", meaning: "너의" }, { word: "ayuda", meaning: "도움" }], category: "기본", difficulty: 1 },
   { id: 3, spanish: "agua", korean: "물", hint: "매일 꼭 마시는 것", example: "¿Me das un vaso de agua?", exampleKo: "물 한 잔 주실래요?", exampleWords: [{ word: "me", meaning: "나에게" }, { word: "das", meaning: "준다" }, { word: "un", meaning: "하나의, 한" }, { word: "vaso", meaning: "유리컵, 잔" }, { word: "de", meaning: "~의, ~로 된" }, { word: "agua", meaning: "물" }], category: "음식", difficulty: 1 },
@@ -81,11 +81,135 @@ const WORDS = [
   { id: 80, spanish: "oportunidad", korean: "기회", hint: "무언가를 할 수 있는 찬스", example: "Es una buena oportunidad para aprender.", exampleKo: "배우기에 좋은 기회야.", exampleWords: [{ word: "es", meaning: "~이다" }, { word: "una", meaning: "하나의, 한" }, { word: "buena", meaning: "좋은" }, { word: "oportunidad", meaning: "기회" }, { word: "para", meaning: "~하기에" }, { word: "aprender", meaning: "배우다" }], category: "기본", difficulty: 4 }
 ];
 
+const EXTRA_WORD_ROWS = [
+  [81, 1, "adiós", "잘 가", "헤어질 때 하는 인사", "Adiós, nos vemos mañana.", "잘 가, 우리 내일 보자.", "기본", [["adiós", "잘 가"], ["nos", "우리 서로를"], ["vemos", "본다"], ["mañana", "내일"]]],
+  [82, 1, "leche", "우유", "아침에 자주 마시는 것", "Necesito leche para el café.", "커피에 넣을 우유가 필요해.", "음식", [["necesito", "나는 필요하다"], ["leche", "우유"], ["para", "~를 위해"], ["el", "그, 정관사"], ["café", "커피"]]],
+  [83, 1, "café", "커피", "잠을 깨울 때 많이 마시는 음료", "Tomo café por la mañana.", "나는 아침에 커피를 마셔.", "음식", [["tomo", "마신다"], ["café", "커피"], ["por", "~에, ~동안"], ["la", "그, 정관사"], ["mañana", "아침"]]],
+  [84, 1, "mesa", "책상, 테이블", "물건을 올려두는 곳", "Las llaves están sobre la mesa.", "열쇠가 테이블 위에 있어.", "사물", [["las", "그, 정관사 복수"], ["llaves", "열쇠들"], ["están", "있다"], ["sobre", "~위에"], ["la", "그, 정관사"], ["mesa", "테이블"]]],
+  [85, 1, "silla", "의자", "앉을 때 쓰는 것", "La silla está junto a la ventana.", "의자가 창문 옆에 있어.", "사물", [["la", "그, 정관사"], ["silla", "의자"], ["está", "있다"], ["junto", "가까이"], ["a", "~에"], ["la", "그, 정관사"], ["ventana", "창문"]]],
+  [86, 1, "puerta", "문", "방을 드나드는 입구", "Cierra la puerta, por favor.", "문 닫아줘, 부탁해.", "사물", [["cierra", "닫아라"], ["la", "그, 정관사"], ["puerta", "문"], ["por", "~에 의해"], ["favor", "부탁"]]],
+  [87, 1, "calle", "거리", "밖으로 나가면 보이는 길", "Hay mucha gente en la calle.", "길에 사람이 많아.", "장소", [["hay", "있다"], ["mucha", "많은"], ["gente", "사람들"], ["en", "~에, ~에서"], ["la", "그, 정관사"], ["calle", "거리"]]],
+  [88, 1, "sol", "태양, 해", "낮에 하늘에서 보이는 것", "Hoy hace sol y calor.", "오늘은 해가 나고 따뜻해.", "기본", [["hoy", "오늘"], ["hace", "한다, 만든다"], ["sol", "해"], ["y", "그리고"], ["calor", "더위, 따뜻함"]]],
+  [89, 1, "noche", "밤", "해가 진 뒤의 시간", "Estudio español por la noche.", "나는 밤에 스페인어를 공부해.", "기본", [["estudio", "공부한다"], ["español", "스페인어"], ["por", "~에, ~동안"], ["la", "그, 정관사"], ["noche", "밤"]]],
+  [90, 1, "perro", "강아지", "집에서 많이 키우는 동물", "El perro duerme en casa.", "강아지가 집에서 자.", "사물", [["el", "그, 정관사"], ["perro", "강아지"], ["duerme", "잔다"], ["en", "~에, ~에서"], ["casa", "집"]]],
+
+  [91, 2, "gato", "고양이", "조용하고 민첩한 동물", "Mi gato mira por la ventana.", "우리 고양이는 창문 밖을 봐.", "사물", [["mi", "나의"], ["gato", "고양이"], ["mira", "본다"], ["por", "~을 통해"], ["la", "그, 정관사"], ["ventana", "창문"]]],
+  [92, 2, "ventana", "창문", "바깥을 볼 수 있는 곳", "Abro la ventana por la mañana.", "나는 아침에 창문을 열어.", "사물", [["abro", "연다"], ["la", "그, 정관사"], ["ventana", "창문"], ["por", "~에"], ["la", "그, 정관사"], ["mañana", "아침"]]],
+  [93, 2, "ciudad", "도시", "사람과 건물이 많은 곳", "Esta ciudad es muy grande.", "이 도시는 아주 커.", "장소", [["esta", "이"], ["ciudad", "도시"], ["es", "~이다"], ["muy", "매우"], ["grande", "큰"]]],
+  [94, 2, "hermana", "여자형제, 자매", "나와 가까운 가족", "Mi hermana estudia música.", "내 여동생은 음악을 공부해.", "사람", [["mi", "나의"], ["hermana", "여자형제"], ["estudia", "공부한다"], ["música", "음악"]]],
+  [95, 2, "madre", "어머니", "가족을 돌봐주는 사람", "Mi madre prepara la cena.", "우리 엄마가 저녁을 준비해.", "사람", [["mi", "나의"], ["madre", "어머니"], ["prepara", "준비한다"], ["la", "그, 정관사"], ["cena", "저녁식사"]]],
+  [96, 2, "padre", "아버지", "가족의 한 사람", "Mi padre trabaja en Seúl.", "우리 아빠는 서울에서 일해.", "사람", [["mi", "나의"], ["padre", "아버지"], ["trabaja", "일한다"], ["en", "~에, ~에서"], ["Seúl", "서울"]]],
+  [97, 2, "oficina", "사무실", "일하는 공간", "La oficina está cerca del banco.", "사무실이 은행 근처에 있어.", "장소", [["la", "그, 정관사"], ["oficina", "사무실"], ["está", "있다"], ["cerca", "가까이"], ["del", "de + el, ~의"], ["banco", "은행"]]],
+  [98, 2, "teléfono", "전화기", "연락할 때 쓰는 기계", "Busco mi teléfono en la mochila.", "나는 가방에서 내 휴대폰을 찾아.", "사물", [["busco", "찾는다"], ["mi", "나의"], ["teléfono", "전화기"], ["en", "~에, ~에서"], ["la", "그, 정관사"], ["mochila", "가방"]]],
+  [99, 2, "mochila", "가방", "물건을 넣고 다니는 것", "La mochila está debajo de la mesa.", "가방이 책상 아래에 있어.", "사물", [["la", "그, 정관사"], ["mochila", "가방"], ["está", "있다"], ["debajo", "아래에"], ["de", "~의, ~에서"], ["la", "그, 정관사"], ["mesa", "테이블"]]],
+  [100, 2, "música", "음악", "듣기 좋은 소리", "Escucho música cuando estudio.", "나는 공부할 때 음악을 들어.", "기본", [["escucho", "듣는다"], ["música", "음악"], ["cuando", "~할 때"], ["estudio", "공부한다"]]],
+
+  [101, 3, "alegre", "기쁜", "마음이 밝고 즐거운 상태", "Estoy alegre porque hoy descanso.", "오늘 쉬어서 기뻐.", "감정", [["estoy", "나는 ~한 상태다"], ["alegre", "기쁜"], ["porque", "~이기 때문에"], ["hoy", "오늘"], ["descanso", "쉰다"]]],
+  [102, 3, "tranquilo", "차분한", "마음이 안정된 느낌", "Necesito un lugar tranquilo para leer.", "읽기 위해 조용한 곳이 필요해.", "형용사", [["necesito", "나는 필요하다"], ["un", "하나의, 한"], ["lugar", "장소"], ["tranquilo", "차분한"], ["para", "~를 위해"], ["leer", "읽다"]]],
+  [103, 3, "nervioso", "긴장한", "마음이 조마조마한 상태", "Estoy nervioso antes del examen.", "시험 전에 긴장돼.", "감정", [["estoy", "나는 ~한 상태다"], ["nervioso", "긴장한"], ["antes", "전에"], ["del", "de + el, ~의"], ["examen", "시험"]]],
+  [104, 3, "seguro", "확신하는, 안전한", "믿음이 있는 상태", "Ahora me siento más seguro.", "이제 나는 더 자신 있어.", "형용사", [["ahora", "지금"], ["me", "나 자신을"], ["siento", "느낀다"], ["más", "더"], ["seguro", "확신하는"]]],
+  [105, 3, "amable", "친절한", "다정하고 예의 있는 느낌", "La profesora es muy amable.", "선생님은 아주 친절해.", "형용사", [["la", "그, 정관사"], ["profesora", "여선생님"], ["es", "~이다"], ["muy", "매우"], ["amable", "친절한"]]],
+  [106, 3, "oscuro", "어두운", "빛이 적은 상태", "El cuarto está oscuro ahora.", "방이 지금 어두워.", "형용사", [["el", "그, 정관사"], ["cuarto", "방"], ["está", "있다, ~한 상태다"], ["oscuro", "어두운"], ["ahora", "지금"]]],
+  [107, 3, "claro", "분명한, 밝은", "이해하기 쉽거나 빛이 있는 느낌", "Tu explicación es clara.", "네 설명은 분명해.", "형용사", [["tu", "너의"], ["explicación", "설명"], ["es", "~이다"], ["clara", "분명한"]]],
+  [108, 3, "orgulloso", "자랑스러운", "스스로 만족스럽고 뿌듯한 상태", "Estoy orgulloso de mi trabajo.", "나는 내 일에 자부심을 느껴.", "감정", [["estoy", "나는 ~한 상태다"], ["orgulloso", "자랑스러운"], ["de", "~에 대해"], ["mi", "나의"], ["trabajo", "일"]]],
+  [109, 3, "preocupado", "걱정하는", "무언가가 신경 쓰이는 상태", "Está preocupado por el tiempo.", "그는 날씨를 걱정하고 있어.", "감정", [["está", "~한 상태다"], ["preocupado", "걱정하는"], ["por", "~에 대해"], ["el", "그, 정관사"], ["tiempo", "날씨, 시간"]]],
+  [110, 3, "fuerte", "강한", "힘이 있거나 인상이 센 상태", "Necesitamos un café fuerte.", "우리는 진한 커피가 필요해.", "형용사", [["necesitamos", "우리는 필요하다"], ["un", "하나의, 한"], ["café", "커피"], ["fuerte", "강한, 진한"]]],
+
+  [111, 4, "preguntar", "질문하다", "모르는 것을 물어보다", "Quiero preguntar algo en clase.", "수업에서 뭔가 질문하고 싶어.", "기본", [["quiero", "원한다"], ["preguntar", "질문하다"], ["algo", "무언가"], ["en", "~에, ~에서"], ["clase", "수업"]]],
+  [112, 4, "responder", "대답하다", "질문에 답을 주다", "Puedo responder en español básico.", "기본적인 스페인어로 대답할 수 있어.", "기본", [["puedo", "할 수 있다"], ["responder", "대답하다"], ["en", "~로"], ["español", "스페인어"], ["básico", "기본적인"]]],
+  [113, 4, "caminar", "걷다", "천천히 발로 이동하다", "Me gusta caminar por el parque.", "나는 공원을 걷는 걸 좋아해.", "기본", [["me", "나 자신을"], ["gusta", "좋아한다"], ["caminar", "걷다"], ["por", "~을 따라"], ["el", "그, 정관사"], ["parque", "공원"]]],
+  [114, 4, "aprender", "배우다", "새로운 것을 익히다", "Aprender palabras nuevas toma tiempo.", "새 단어를 배우는 데는 시간이 걸려.", "기본", [["aprender", "배우다"], ["palabras", "단어들"], ["nuevas", "새로운"], ["toma", "걸린다"], ["tiempo", "시간"]]],
+  [115, 4, "visitar", "방문하다", "어떤 장소나 사람을 찾아가다", "Voy a visitar a mi abuela.", "나는 할머니를 찾아갈 거야.", "기본", [["voy", "나는 간다"], ["a", "~하러"], ["visitar", "방문하다"], ["a", "~를"], ["mi", "나의"], ["abuela", "할머니"]]],
+  [116, 4, "esperar", "기다리다", "시간이 올 때까지 머무르다", "Tenemos que esperar el autobús.", "우리는 버스를 기다려야 해.", "기본", [["tenemos", "우리는 가지고 있다"], ["que", "~해야 한다"], ["esperar", "기다리다"], ["el", "그, 정관사"], ["autobús", "버스"]]],
+  [117, 4, "llamar", "전화하다, 부르다", "이름을 부르거나 연락하다", "Necesito llamar a mi amigo.", "친구에게 전화해야 해.", "기본", [["necesito", "나는 필요하다"], ["llamar", "전화하다"], ["a", "~에게"], ["mi", "나의"], ["amigo", "친구"]]],
+  [118, 4, "preparar", "준비하다", "미리 갖추다", "Voy a preparar la comida.", "나는 음식을 준비할 거야.", "기본", [["voy", "나는 간다"], ["a", "~하러"], ["preparar", "준비하다"], ["la", "그, 정관사"], ["comida", "음식"]]],
+  [119, 4, "cambiar", "바꾸다", "다른 상태로 바꿔놓다", "Quiero cambiar mi horario.", "내 일정을 바꾸고 싶어.", "기본", [["quiero", "원한다"], ["cambiar", "바꾸다"], ["mi", "나의"], ["horario", "일정표"]]],
+  [120, 4, "viajar", "여행하다", "다른 곳으로 이동하며 경험하다", "Nos gusta viajar en verano.", "우리는 여름에 여행하는 걸 좋아해.", "기본", [["nos", "우리 자신을"], ["gusta", "좋아한다"], ["viajar", "여행하다"], ["en", "~에"], ["verano", "여름"]]],
+
+  [121, 5, "aeropuerto", "공항", "비행기를 타고 내리는 곳", "Llegamos temprano al aeropuerto.", "우리는 공항에 일찍 도착했어.", "장소", [["llegamos", "도착했다"], ["temprano", "일찍"], ["al", "a + el, ~로"], ["aeropuerto", "공항"]]],
+  [122, 5, "equipaje", "짐, 수하물", "여행할 때 챙기는 짐", "Mi equipaje pesa mucho.", "내 짐은 무게가 많이 나가.", "사물", [["mi", "나의"], ["equipaje", "짐"], ["pesa", "무게가 나간다"], ["mucho", "많이"]]],
+  [123, 5, "reserva", "예약", "미리 자리를 잡아두는 것", "Tengo una reserva para esta noche.", "오늘 밤 예약이 있어.", "기본", [["tengo", "나는 가지고 있다"], ["una", "하나의, 한"], ["reserva", "예약"], ["para", "~를 위한"], ["esta", "이"], ["noche", "밤"]]],
+  [124, 5, "boleto", "표, 티켓", "이동하거나 입장할 때 필요한 것", "Compré el boleto en línea.", "나는 온라인으로 표를 샀어.", "사물", [["compré", "샀다"], ["el", "그, 정관사"], ["boleto", "표"], ["en", "~에서"], ["línea", "온라인"]]],
+  [125, 5, "retraso", "지연", "예정보다 늦어지는 일", "Hay un retraso en el tren.", "기차가 지연되고 있어.", "기본", [["hay", "있다"], ["un", "하나의, 한"], ["retraso", "지연"], ["en", "~에"], ["el", "그, 정관사"], ["tren", "기차"]]],
+  [126, 5, "reunión", "회의", "함께 모여 이야기하는 자리", "Tenemos una reunión importante hoy.", "오늘 중요한 회의가 있어.", "기본", [["tenemos", "우리는 가지고 있다"], ["una", "하나의, 한"], ["reunión", "회의"], ["importante", "중요한"], ["hoy", "오늘"]]],
+  [127, 5, "proyecto", "프로젝트", "함께 진행하는 일", "El proyecto avanza bien.", "프로젝트가 잘 진행되고 있어.", "사물", [["el", "그, 정관사"], ["proyecto", "프로젝트"], ["avanza", "진행된다"], ["bien", "잘"]]],
+  [128, 5, "horario", "시간표, 일정", "시간 순서로 정리된 계획", "Reviso mi horario cada mañana.", "나는 매일 아침 내 일정을 확인해.", "사물", [["reviso", "확인한다"], ["mi", "나의"], ["horario", "시간표"], ["cada", "매"], ["mañana", "아침"]]],
+  [129, 5, "enviar", "보내다", "메시지나 물건을 전달하다", "Voy a enviar el correo ahora.", "지금 메일을 보낼 거야.", "기본", [["voy", "나는 간다"], ["a", "~하러"], ["enviar", "보내다"], ["el", "그, 정관사"], ["correo", "메일"], ["ahora", "지금"]]],
+  [130, 5, "decidir", "결정하다", "여러 선택지 중 하나를 고르다", "Necesitamos decidir pronto.", "우리는 곧 결정해야 해.", "기본", [["necesitamos", "우리는 필요하다"], ["decidir", "결정하다"], ["pronto", "곧"]]],
+  [131, 5, "proponer", "제안하다", "새로운 생각을 내놓다", "Quiero proponer una idea.", "아이디어를 하나 제안하고 싶어.", "기본", [["quiero", "원한다"], ["proponer", "제안하다"], ["una", "하나의, 한"], ["idea", "생각, 아이디어"]]],
+  [132, 5, "mejorar", "개선하다", "더 나은 상태로 만들다", "Practicar ayuda a mejorar.", "연습은 실력을 향상시키는 데 도움이 돼.", "기본", [["practicar", "연습하다"], ["ayuda", "도움이 된다"], ["a", "~하는 데"], ["mejorar", "개선하다"]]],
+  [133, 5, "desarrollar", "발전시키다", "점점 더 자라게 하다", "Quiero desarrollar mi vocabulario.", "어휘를 더 발전시키고 싶어.", "기본", [["quiero", "원한다"], ["desarrollar", "발전시키다"], ["mi", "나의"], ["vocabulario", "어휘"]]],
+  [134, 5, "necesario", "필요한", "반드시 있어야 하는", "Es necesario confirmar la reserva.", "예약을 확인하는 것이 필요해.", "형용사", [["es", "~이다"], ["necesario", "필요한"], ["confirmar", "확인하다"], ["la", "그, 정관사"], ["reserva", "예약"]]],
+  [135, 5, "disponible", "이용 가능한", "쓸 수 있거나 열려 있는", "No hay mesa disponible ahora.", "지금 이용 가능한 자리가 없어.", "형용사", [["no", "아니다"], ["hay", "있다"], ["mesa", "자리, 테이블"], ["disponible", "이용 가능한"], ["ahora", "지금"]]],
+  [136, 5, "confirmar", "확인하다", "맞는지 다시 점검하다", "Necesito confirmar la hora.", "시간을 다시 확인해야 해.", "기본", [["necesito", "나는 필요하다"], ["confirmar", "확인하다"], ["la", "그, 정관사"], ["hora", "시간"]]],
+  [137, 5, "documento", "문서", "정보가 적힌 종이 또는 파일", "Guardo el documento en la carpeta.", "문서를 폴더에 저장해.", "사물", [["guardo", "저장한다"], ["el", "그, 정관사"], ["documento", "문서"], ["en", "~에"], ["la", "그, 정관사"], ["carpeta", "폴더"]]],
+  [138, 5, "costumbre", "습관, 관습", "오랫동안 반복해 온 방식", "Es una costumbre familiar.", "그건 가족의 습관이야.", "기본", [["es", "~이다"], ["una", "하나의, 한"], ["costumbre", "습관"], ["familiar", "가족의"]]],
+  [139, 5, "paisaje", "풍경", "눈앞에 보이는 자연과 경치", "El paisaje aquí es hermoso.", "여기 풍경은 아름다워.", "장소", [["el", "그, 정관사"], ["paisaje", "풍경"], ["aquí", "여기"], ["es", "~이다"], ["hermoso", "아름다운"]]],
+  [140, 5, "recorrido", "동선, 경로", "어디를 따라 이동하는 길", "El recorrido dura dos horas.", "그 경로는 두 시간 걸려.", "기본", [["el", "그, 정관사"], ["recorrido", "경로"], ["dura", "지속된다"], ["dos", "둘"], ["horas", "시간들"]]],
+  [141, 5, "alojamiento", "숙소", "머무는 장소", "Buscamos alojamiento cerca del centro.", "우리는 중심가 근처 숙소를 찾고 있어.", "장소", [["buscamos", "우리는 찾는다"], ["alojamiento", "숙소"], ["cerca", "가까이"], ["del", "de + el, ~의"], ["centro", "중심지"]]],
+  [142, 5, "facturar", "부치다, 체크인하다", "짐을 맡기거나 체크인 절차를 하다", "Voy a facturar mi maleta.", "짐을 부칠 거야.", "기본", [["voy", "나는 간다"], ["a", "~하러"], ["facturar", "부치다"], ["mi", "나의"], ["maleta", "여행가방"]]],
+  [143, 5, "alquilar", "빌리다, 대여하다", "돈을 내고 잠시 사용하다", "Queremos alquilar un coche.", "우리는 차를 빌리고 싶어.", "기본", [["queremos", "우리는 원한다"], ["alquilar", "대여하다"], ["un", "하나의, 한"], ["coche", "차"]]],
+  [144, 5, "extranjero", "외국의, 외국인", "자기 나라 밖과 관련된", "Conocí a un estudiante extranjero.", "나는 외국인 학생을 만났어.", "형용사", [["conocí", "만났다"], ["a", "~를"], ["un", "하나의, 한"], ["estudiante", "학생"], ["extranjero", "외국의, 외국인"]]],
+  [145, 5, "acuerdo", "합의, 동의", "생각이 서로 맞는 상태", "Llegamos a un acuerdo rápido.", "우리는 빨리 합의에 도달했어.", "기본", [["llegamos", "도달했다"], ["a", "~에"], ["un", "하나의, 한"], ["acuerdo", "합의"], ["rápido", "빠른"]]],
+  [146, 5, "pendiente", "미완료인, 남아 있는", "아직 끝나지 않은 상태", "Tengo una tarea pendiente.", "아직 끝내지 못한 일이 있어.", "형용사", [["tengo", "나는 가지고 있다"], ["una", "하나의, 한"], ["tarea", "과제"], ["pendiente", "남아 있는"]]],
+  [147, 5, "resultado", "결과", "일의 마지막에 나온 것", "El resultado fue mejor de lo esperado.", "결과는 예상보다 더 좋았어.", "기본", [["el", "그, 정관사"], ["resultado", "결과"], ["fue", "~였다"], ["mejor", "더 좋은"], ["de", "~보다"], ["lo", "그것"], ["esperado", "예상된"]]],
+  [148, 5, "tarea", "과제, 일", "해야 하는 일거리", "Termino la tarea esta tarde.", "오늘 오후에 과제를 끝낼 거야.", "사물", [["termino", "끝낸다"], ["la", "그, 정관사"], ["tarea", "과제"], ["esta", "이"], ["tarde", "오후"]]],
+  [149, 5, "detalle", "세부사항", "작지만 중요한 부분", "Cuida cada detalle del plan.", "계획의 세부사항 하나하나를 신경 써.", "기본", [["cuida", "신경 써라"], ["cada", "각각의"], ["detalle", "세부사항"], ["del", "de + el, ~의"], ["plan", "계획"]]],
+  [150, 5, "consejo", "조언", "도움이 되는 말", "Gracias por tu consejo.", "조언해줘서 고마워.", "기본", [["gracias", "고마워"], ["por", "~에 대해"], ["tu", "너의"], ["consejo", "조언"]]],
+
+  [151, 6, "lograr", "이뤄내다", "목표를 성취하다", "Quiero lograr una meta grande.", "큰 목표를 이루고 싶어.", "기본", [["quiero", "원한다"], ["lograr", "이뤄내다"], ["una", "하나의, 한"], ["meta", "목표"], ["grande", "큰"]]],
+  [152, 6, "aprovechar", "잘 활용하다", "기회를 놓치지 않고 쓰다", "Debemos aprovechar esta oportunidad.", "우리는 이 기회를 잘 활용해야 해.", "기본", [["debemos", "우리는 해야 한다"], ["aprovechar", "활용하다"], ["esta", "이"], ["oportunidad", "기회"]]],
+  [153, 6, "desafío", "도전", "쉽지 않지만 해볼 만한 일", "Aprender solo es un desafío.", "혼자 배우는 건 도전이야.", "기본", [["aprender", "배우다"], ["solo", "혼자"], ["es", "~이다"], ["un", "하나의, 한"], ["desafío", "도전"]]],
+  [154, 6, "crecimiento", "성장", "점점 나아지는 과정", "Veo crecimiento en tu español.", "네 스페인어 실력이 성장하는 게 보여.", "기본", [["veo", "본다"], ["crecimiento", "성장"], ["en", "~에서"], ["tu", "너의"], ["español", "스페인어"]]],
+  [155, 6, "establecer", "세우다, 설정하다", "규칙이나 계획을 정하다", "Necesitamos establecer prioridades.", "우리는 우선순위를 정해야 해.", "기본", [["necesitamos", "우리는 필요하다"], ["establecer", "설정하다"], ["prioridades", "우선순위들"]]],
+  [156, 6, "resolver", "해결하다", "문제를 풀어내다", "Podemos resolver este problema juntos.", "우리는 이 문제를 함께 해결할 수 있어.", "기본", [["podemos", "우리는 할 수 있다"], ["resolver", "해결하다"], ["este", "이"], ["problema", "문제"], ["juntos", "함께"]]],
+  [157, 6, "considerar", "고려하다", "결정 전에 생각해보다", "Debes considerar todas las opciones.", "모든 선택지를 고려해야 해.", "기본", [["debes", "너는 해야 한다"], ["considerar", "고려하다"], ["todas", "모든"], ["las", "그, 정관사 복수"], ["opciones", "선택지들"]]],
+  [158, 6, "rendimiento", "성과, 수행력", "얼마나 잘 해내는지의 정도", "Su rendimiento mejoró mucho.", "그의 수행력은 많이 좋아졌어.", "기본", [["su", "그의"], ["rendimiento", "성과"], ["mejoró", "향상되었다"], ["mucho", "많이"]]],
+  [159, 6, "sostenible", "지속 가능한", "오랫동안 유지할 수 있는", "Buscamos un plan sostenible.", "우리는 지속 가능한 계획을 찾고 있어.", "형용사", [["buscamos", "우리는 찾는다"], ["un", "하나의, 한"], ["plan", "계획"], ["sostenible", "지속 가능한"]]],
+  [160, 6, "complejo", "복잡한", "단순하지 않고 여러 요소가 있는", "El tema parece complejo al principio.", "그 주제는 처음엔 복잡해 보여.", "형용사", [["el", "그, 정관사"], ["tema", "주제"], ["parece", "보인다"], ["complejo", "복잡한"], ["al", "a + el, ~에"], ["principio", "처음"]]],
+  [161, 6, "objetivo", "목표", "도달하고 싶은 지점", "Mi objetivo es hablar mejor.", "내 목표는 더 잘 말하는 거야.", "기본", [["mi", "나의"], ["objetivo", "목표"], ["es", "~이다"], ["hablar", "말하다"], ["mejor", "더 잘"]]],
+  [162, 6, "estrategia", "전략", "효율적으로 해내기 위한 방법", "Necesitamos una estrategia clara.", "우리에겐 분명한 전략이 필요해.", "기본", [["necesitamos", "우리는 필요하다"], ["una", "하나의, 한"], ["estrategia", "전략"], ["clara", "분명한"]]],
+  [163, 6, "negociación", "협상", "서로 조건을 맞춰가는 대화", "La negociación tomó tiempo.", "협상에는 시간이 걸렸어.", "기본", [["la", "그, 정관사"], ["negociación", "협상"], ["tomó", "걸렸다"], ["tiempo", "시간"]]],
+  [164, 6, "investigar", "조사하다", "정보를 찾아 자세히 살피다", "Voy a investigar el tema mañana.", "내일 그 주제를 조사할 거야.", "기본", [["voy", "나는 간다"], ["a", "~하러"], ["investigar", "조사하다"], ["el", "그, 정관사"], ["tema", "주제"], ["mañana", "내일"]]],
+  [165, 6, "destacar", "두드러지다, 강조하다", "다른 것보다 눈에 띄다", "Su esfuerzo empieza a destacar.", "그의 노력이 점점 두드러지기 시작해.", "기본", [["su", "그의"], ["esfuerzo", "노력"], ["empieza", "시작한다"], ["a", "~하기"], ["destacar", "두드러지다"]]],
+  [166, 6, "confianza", "신뢰, 자신감", "믿고 맡길 수 있는 마음", "La práctica da confianza.", "연습은 자신감을 줘.", "감정", [["la", "그, 정관사"], ["práctica", "연습"], ["da", "준다"], ["confianza", "자신감"]]],
+  [167, 6, "entorno", "환경", "주변의 상황과 조건", "Un buen entorno ayuda mucho.", "좋은 환경은 큰 도움이 돼.", "장소", [["un", "하나의, 한"], ["buen", "좋은"], ["entorno", "환경"], ["ayuda", "도움이 된다"], ["mucho", "많이"]]],
+  [168, 6, "mantener", "유지하다", "같은 상태를 계속 이어가다", "Es difícil mantener el ritmo.", "리듬을 유지하는 건 어려워.", "기본", [["es", "~이다"], ["difícil", "어려운"], ["mantener", "유지하다"], ["el", "그, 정관사"], ["ritmo", "리듬"]]],
+  [169, 6, "superar", "극복하다", "어려움을 넘어서다", "Podrás superar esta etapa.", "너는 이 단계를 극복할 수 있을 거야.", "기본", [["podrás", "너는 할 수 있을 것이다"], ["superar", "극복하다"], ["esta", "이"], ["etapa", "단계"]]],
+  [170, 6, "propuesta", "제안서, 제안", "공식적으로 내놓는 의견", "Leí tu propuesta con calma.", "나는 네 제안을 차분히 읽었어.", "기본", [["leí", "읽었다"], ["tu", "너의"], ["propuesta", "제안"], ["con", "~와 함께"], ["calma", "차분함"]]],
+  [171, 6, "colaboración", "협업", "함께 힘을 모아 일하는 것", "La colaboración fue excelente.", "협업은 훌륭했어.", "기본", [["la", "그, 정관사"], ["colaboración", "협업"], ["fue", "~였다"], ["excelente", "훌륭한"]]],
+  [172, 6, "recurso", "자원", "도움이 되는 자료나 수단", "Este recurso es muy útil.", "이 자료는 아주 유용해.", "사물", [["este", "이"], ["recurso", "자원"], ["es", "~이다"], ["muy", "매우"], ["útil", "유용한"]]],
+  [173, 6, "adaptar", "적응시키다, 맞추다", "상황에 맞게 바꾸다", "Debemos adaptar el plan al cambio.", "우리는 변화에 맞게 계획을 조정해야 해.", "기본", [["debemos", "우리는 해야 한다"], ["adaptar", "맞추다"], ["el", "그, 정관사"], ["plan", "계획"], ["al", "a + el, ~에"], ["cambio", "변화"]]],
+  [174, 6, "ampliar", "확장하다", "더 넓히거나 늘리다", "Quiero ampliar mi vocabulario activo.", "내가 실제로 쓰는 어휘를 더 넓히고 싶어.", "기본", [["quiero", "원한다"], ["ampliar", "확장하다"], ["mi", "나의"], ["vocabulario", "어휘"], ["activo", "활성의"]]],
+  [175, 6, "preciso", "정확한", "틀림없이 딱 맞는", "Necesitamos datos precisos.", "우리는 정확한 자료가 필요해.", "형용사", [["necesitamos", "우리는 필요하다"], ["datos", "자료들"], ["precisos", "정확한"]]],
+  [176, 6, "probable", "가능성이 높은", "그럴 것 같은", "Es probable que llueva hoy.", "오늘 비가 올 가능성이 높아.", "형용사", [["es", "~이다"], ["probable", "가능성이 높은"], ["que", "~라는 것"], ["llueva", "비가 오다"], ["hoy", "오늘"]]],
+  [177, 6, "eficiente", "효율적인", "적은 힘으로 잘 해내는", "Buscamos una forma eficiente.", "우리는 효율적인 방법을 찾고 있어.", "형용사", [["buscamos", "우리는 찾는다"], ["una", "하나의, 한"], ["forma", "방법"], ["eficiente", "효율적인"]]],
+  [178, 6, "constante", "꾸준한", "계속 이어지는", "El progreso constante motiva mucho.", "꾸준한 발전은 큰 동기가 돼.", "형용사", [["el", "그, 정관사"], ["progreso", "발전"], ["constante", "꾸준한"], ["motiva", "동기를 준다"], ["mucho", "많이"]]],
+  [179, 6, "análisis", "분석", "정보를 나눠 자세히 보는 일", "El análisis revela un patrón.", "분석은 하나의 패턴을 보여줘.", "기본", [["el", "그, 정관사"], ["análisis", "분석"], ["revela", "드러낸다"], ["un", "하나의, 한"], ["patrón", "패턴"]]],
+  [180, 6, "solución", "해결책", "문제를 푸는 방법", "Necesitamos una solución práctica.", "우리에겐 실용적인 해결책이 필요해.", "기본", [["necesitamos", "우리는 필요하다"], ["una", "하나의, 한"], ["solución", "해결책"], ["práctica", "실용적인"]]]
+];
+
+const EXTRA_WORDS = EXTRA_WORD_ROWS.map(([id, difficulty, spanish, korean, hint, example, exampleKo, category, exampleWords]) => ({
+  id,
+  spanish,
+  korean,
+  hint,
+  example,
+  exampleKo,
+  category,
+  difficulty,
+  exampleWords: exampleWords.map(([word, meaning]) => ({ word, meaning }))
+}));
+
+const WORDS = [...BASE_WORDS, ...EXTRA_WORDS];
+
 const LEVELS = [
   { level: 1, title: "Hola Start", minXp: 0, maxXp: 59, focus: "기초 인사와 생활 단어" },
   { level: 2, title: "Daily Flow", minXp: 60, maxXp: 139, focus: "일상 사물과 사람 표현" },
   { level: 3, title: "Quiz Booster", minXp: 140, maxXp: 249, focus: "형용사와 감정 어휘" },
-  { level: 4, title: "Conversation Mode", minXp: 250, maxXp: Infinity, focus: "짧은 문장 확장과 응용" }
+  { level: 4, title: "Conversation Mode", minXp: 250, maxXp: 389, focus: "짧은 문장 확장과 응용" },
+  { level: 5, title: "Travel Talk", minXp: 390, maxXp: 559, focus: "여행, 일정, 실전 표현" },
+  { level: 6, title: "Fluent Stretch", minXp: 560, maxXp: Infinity, focus: "고급 어휘와 사고 확장 표현" }
 ];
 
 const STORAGE_KEY = "palabra-sprint-db";
