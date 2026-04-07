@@ -40,7 +40,7 @@ button {
 }
 
 .app-shell {
-  width: min(1180px, calc(100% - 32px));
+  width: min(1360px, calc(100% - 40px));
   margin: 0 auto;
   padding: 40px 0 56px;
 }
@@ -458,9 +458,20 @@ button {
 
 .study-card-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.08fr) minmax(320px, 0.92fr);
-  gap: 22px;
+  grid-template-columns: minmax(0, 1.36fr) minmax(360px, 0.94fr);
+  gap: 24px;
   align-items: start;
+}
+
+.study-card-layout > .panel,
+.panel--featured {
+  min-width: 0;
+}
+
+.panel--featured .panel__header,
+.study-example-side .panel__header {
+  align-items: flex-start;
+  flex-wrap: wrap;
 }
 
 .study-example-side {
@@ -473,7 +484,7 @@ button {
 }
 
 .study-example-card {
-  padding: 20px;
+  padding: 18px;
   border-radius: 22px;
   border: 1px solid var(--line);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(252, 247, 239, 0.97));
@@ -763,7 +774,7 @@ button {
 
 .flashcard__layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 220px;
+  grid-template-columns: minmax(0, 1.16fr) minmax(190px, 0.84fr);
   gap: 20px;
   align-items: stretch;
   width: 100%;
@@ -965,6 +976,18 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 14px;
+}
+
+.study-example-card .example-glossary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.study-example-card .example-glossary__item {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
 }
 
 .example-glossary__item {
@@ -1208,12 +1231,23 @@ button {
   letter-spacing: 0.01em;
 }
 
+@media (max-width: 1240px) {
+  .study-card-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .study-example-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 920px) {
   .hero,
   .dashboard,
   .profile-grid,
   .hero__stats,
-  .learn-overview-grid {
+  .learn-overview-grid,
+  .study-example-list {
     grid-template-columns: 1fr;
   }
 
