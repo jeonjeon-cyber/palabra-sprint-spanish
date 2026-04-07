@@ -151,13 +151,14 @@ function renderApp() {
   const mascot = getMascotState(state.mascotMood);
   const frontTitleSize = getFlashcardTitleSize(currentWord.spanish);
   const backTitleSize = getFlashcardTitleSize(currentWord.korean, true);
+  const studyExamples = getStudyExamples(currentWord);
 
   app.innerHTML = `
     <div class="app-shell">
       <header class="hero">
         <div class="hero__copy">
           <p class="eyebrow">Spanish Vocab Trainer</p>
-          <h1>Palabra Sprint</h1>
+          <h1>???? ????</h1>
           <p class="hero__text">
             스페인어 단어를 카드로 익히고, 퀴즈로 실력을 확인하는 학습 앱입니다.
             사용자별 기록, 레벨업, 발음 재생까지 한 화면에서 자연스럽게 이어집니다.
@@ -304,116 +305,150 @@ function renderApp() {
         ` : ""}
 
         ${state.activeTab === "learn" && state.learnScreen === "card" ? `
-          <section class="panel panel--featured">
-            <div class="panel__header">
-              <div>
-                <p class="panel__eyebrow">오늘의 학습</p>
-                <h2>레벨 ${activeLevelNumber} 단어 카드</h2>
-              </div>
-              <button class="ghost-button" data-action="shuffle-flashcard">섞기</button>
-            </div>
-
-            <div class="study-toolbar">
-              <div class="mascot-card mascot-card--${mascot.tone}">
-                <div class="mascot-face mascot-face--${mascot.tone}" aria-hidden="true">
-                  <span class="mascot-face__eye mascot-face__eye--left"></span>
-                  <span class="mascot-face__eye mascot-face__eye--right"></span>
-                  <span class="mascot-face__mouth"></span>
-                </div>
-                <div class="mascot-copy">
-                  <strong>${escapeHtml(mascot.title)}</strong>
-                  <p>${escapeHtml(state.mascotMessage)}</p>
-                </div>
-              </div>
-              <div class="word-status-actions">
-                <button type="button" class="${isFavoriteWord ? "status-chip favorite is-active" : "status-chip favorite"}" data-action="toggle-favorite">즐겨찾기</button>
-                <button type="button" class="${isReviewWord ? "status-chip is-active review" : "status-chip review"}" data-action="toggle-review">복습 필요</button>
-              </div>
-            </div>
-
-            <article class="${state.isFlipped ? "flashcard is-flipped" : "flashcard"}" id="flashcard">
-              <button class="card-toggle-button" data-action="flip-card">${state.isFlipped ? "앞면 보기" : "뜻 보기"}</button>
-              <div class="flashcard__inner">
-                <div class="flashcard__face flashcard__face--front">
-                  <div class="flashcard__layout">
-                    <div class="flashcard__main">
-                      <span class="flashcard__label">Spanish</span>
-                      <h3 class="flashcard__title" style="font-size: ${frontTitleSize};">${escapeHtml(currentWord.spanish)}</h3>
-                      <p>${escapeHtml(currentWord.example)}</p>
-                      <button class="sound-button" data-action="speak" data-word="${escapeAttribute(currentWord.spanish)}">발음 듣기</button>
-                      <span class="card-level-tag">레벨 ${currentWord.difficulty}</span>
-                    </div>
-                    <aside class="grammar-panel">
-                      <p class="grammar-panel__eyebrow">문장 분석</p>
-                      <div class="grammar-panel__item">
-                        <span>품사</span>
-                        <strong>${escapeHtml(grammarInfo.partOfSpeech)}</strong>
-                      </div>
-                      <div class="grammar-panel__item">
-                        <span>문장 역할</span>
-                        <strong>${escapeHtml(grammarInfo.sentenceRole)}</strong>
-                      </div>
-                      <div class="grammar-panel__item">
-                        <span>핵심 포인트</span>
-                        <strong>${escapeHtml(grammarInfo.grammarTip)}</strong>
-                      </div>
-                    </aside>
-                  </div>
-                </div>
-                <div class="flashcard__face flashcard__face--back">
-                  <div class="flashcard__layout">
-                    <div class="flashcard__main">
-                      <span class="flashcard__label">Korean</span>
-                      <h3 class="flashcard__title flashcard__title--back" style="font-size: ${backTitleSize};">${escapeHtml(currentWord.korean)}</h3>
-                      <p>${escapeHtml(currentWord.hint)}</p>
-                      <span class="difficulty-badge">난이도 ${currentWord.difficulty}</span>
-                    </div>
-                    <aside class="grammar-panel grammar-panel--back">
-                      <p class="grammar-panel__eyebrow">학습 포인트</p>
-                      <div class="grammar-panel__item">
-                        <span>품사 기억법</span>
-                        <strong>${escapeHtml(grammarInfo.memoryTip)}</strong>
-                      </div>
-                      <div class="grammar-panel__item">
-                        <span>예문 속 위치</span>
-                        <strong>${escapeHtml(grammarInfo.positionHint)}</strong>
-                      </div>
-                      <div class="grammar-panel__item">
-                        <span>연습 팁</span>
-                        <strong>${escapeHtml(grammarInfo.practiceTip)}</strong>
-                      </div>
-                    </aside>
-                  </div>
-                </div>
-              </div>
-            </article>
-            <div class="flashcard-actions">
-              <button class="ghost-button" data-action="prev-flashcard">이전 단어</button>
-              <button class="secondary-button" data-action="mark-known">외웠어요 +12XP</button>
-              <button class="ghost-button" data-action="next-flashcard">다음 단어</button>
-            </div>
-            <div class="note-panel note-panel--card">
-              <div class="note-panel__header">
+          <div class="study-card-layout">
+            <section class="panel panel--featured">
+              <div class="panel__header">
                 <div>
-                  <p class="note-panel__eyebrow">단어 메모장</p>
-                  <h3>${escapeHtml(currentWord.spanish)} 메모</h3>
+                  <p class="panel__eyebrow">??? ??</p>
+                  <h2>?? ${activeLevelNumber} ?? ??</h2>
                 </div>
-                <button class="ghost-button ghost-button--small" data-action="clear-note">지우기</button>
+                <button class="ghost-button" data-action="shuffle-flashcard">??</button>
               </div>
-              <textarea
-                id="word-note"
-                data-word-id="${currentWord.id}"
-                class="note-textarea"
-                placeholder="여기에 직접 적어보세요. 뜻, 헷갈리는 포인트, 나만의 예문을 남길 수 있어요."
-              >${escapeHtml(currentWordNote)}</textarea>
-              <div class="note-templates">
-                <button class="note-template" data-action="append-note-template" data-template="뜻: ${escapeAttribute(currentWord.korean)}&#10;">뜻 템플릿</button>
-                <button class="note-template" data-action="append-note-template" data-template="예문 따라쓰기: ${escapeAttribute(currentWord.example)}&#10;">예문 따라쓰기</button>
-                <button class="note-template" data-action="append-note-template" data-template="헷갈리는 점: &#10;">헷갈리는 점</button>
+
+              <div class="study-toolbar">
+                <div class="mascot-card mascot-card--${mascot.tone}">
+                  <div class="mascot-face mascot-face--${mascot.tone}" aria-hidden="true">
+                    <span class="mascot-face__eye mascot-face__eye--left"></span>
+                    <span class="mascot-face__eye mascot-face__eye--right"></span>
+                    <span class="mascot-face__mouth"></span>
+                  </div>
+                  <div class="mascot-copy">
+                    <strong>${escapeHtml(mascot.title)}</strong>
+                    <p>${escapeHtml(state.mascotMessage)}</p>
+                  </div>
+                </div>
+                <div class="word-status-actions">
+                  <button type="button" class="${isFavoriteWord ? "status-chip favorite is-active" : "status-chip favorite"}" data-action="toggle-favorite">????</button>
+                  <button type="button" class="${isReviewWord ? "status-chip is-active review" : "status-chip review"}" data-action="toggle-review">?? ??</button>
+                </div>
               </div>
-              <p class="note-hint">단어별로 자동 저장됩니다. 다른 단어로 이동해도 다시 돌아오면 그대로 남아 있어요.</p>
-            </div>
-          </section>
+
+              <article class="${state.isFlipped ? "flashcard is-flipped" : "flashcard"}" id="flashcard">
+                <button class="card-toggle-button" data-action="flip-card">${state.isFlipped ? "?? ??" : "? ??"}</button>
+                <div class="flashcard__inner">
+                  <div class="flashcard__face flashcard__face--front">
+                    <div class="flashcard__layout">
+                      <div class="flashcard__main">
+                        <span class="flashcard__label">Spanish</span>
+                        <h3 class="flashcard__title" style="font-size: ${frontTitleSize};">${escapeHtml(currentWord.spanish)}</h3>
+                        <p>${escapeHtml(currentWord.example)}</p>
+                        <button class="sound-button" data-action="speak" data-word="${escapeAttribute(currentWord.spanish)}">?? ??</button>
+                        <span class="card-level-tag">?? ${currentWord.difficulty}</span>
+                      </div>
+                      <aside class="grammar-panel">
+                        <p class="grammar-panel__eyebrow">?? ??</p>
+                        <div class="grammar-panel__item">
+                          <span>??</span>
+                          <strong>${escapeHtml(grammarInfo.partOfSpeech)}</strong>
+                        </div>
+                        <div class="grammar-panel__item">
+                          <span>?? ??</span>
+                          <strong>${escapeHtml(grammarInfo.sentenceRole)}</strong>
+                        </div>
+                        <div class="grammar-panel__item">
+                          <span>?? ???</span>
+                          <strong>${escapeHtml(grammarInfo.grammarTip)}</strong>
+                        </div>
+                      </aside>
+                    </div>
+                  </div>
+                  <div class="flashcard__face flashcard__face--back">
+                    <div class="flashcard__layout">
+                      <div class="flashcard__main">
+                        <span class="flashcard__label">Korean</span>
+                        <h3 class="flashcard__title flashcard__title--back" style="font-size: ${backTitleSize};">${escapeHtml(currentWord.korean)}</h3>
+                        <p>${escapeHtml(currentWord.hint)}</p>
+                        <span class="difficulty-badge">??? ${currentWord.difficulty}</span>
+                      </div>
+                      <aside class="grammar-panel grammar-panel--back">
+                        <p class="grammar-panel__eyebrow">?? ???</p>
+                        <div class="grammar-panel__item">
+                          <span>?? ???</span>
+                          <strong>${escapeHtml(grammarInfo.memoryTip)}</strong>
+                        </div>
+                        <div class="grammar-panel__item">
+                          <span>?? ? ??</span>
+                          <strong>${escapeHtml(grammarInfo.positionHint)}</strong>
+                        </div>
+                        <div class="grammar-panel__item">
+                          <span>?? ?</span>
+                          <strong>${escapeHtml(grammarInfo.practiceTip)}</strong>
+                        </div>
+                      </aside>
+                    </div>
+                  </div>
+                </div>
+              </article>
+              <div class="flashcard-actions">
+                <button class="ghost-button" data-action="prev-flashcard">?? ??</button>
+                <button class="secondary-button" data-action="mark-known">???? +12XP</button>
+                <button class="ghost-button" data-action="next-flashcard">?? ??</button>
+              </div>
+              <div class="note-panel note-panel--card">
+                <div class="note-panel__header">
+                  <div>
+                    <p class="note-panel__eyebrow">?? ???</p>
+                    <h3>${escapeHtml(currentWord.spanish)} ??</h3>
+                  </div>
+                  <button class="ghost-button ghost-button--small" data-action="clear-note">???</button>
+                </div>
+                <textarea
+                  id="word-note"
+                  data-word-id="${currentWord.id}"
+                  class="note-textarea"
+                  placeholder="??? ?? ?????. ?, ???? ???, ??? ??? ?? ? ???."
+                >${escapeHtml(currentWordNote)}</textarea>
+                <div class="note-templates">
+                  <button class="note-template" data-action="append-note-template" data-template="?: ${escapeAttribute(currentWord.korean)}&#10;">? ???</button>
+                  <button class="note-template" data-action="append-note-template" data-template="?? ????: ${escapeAttribute(currentWord.example)}&#10;">?? ????</button>
+                  <button class="note-template" data-action="append-note-template" data-template="???? ?: &#10;">???? ?</button>
+                </div>
+                <p class="note-hint">???? ?? ?????. ?? ??? ???? ?? ???? ??? ?? ???.</p>
+              </div>
+            </section>
+
+            <section class="panel study-example-side">
+              <div class="panel__header">
+                <div>
+                  <p class="panel__eyebrow">Example Lab</p>
+                  <h2>???? ??</h2>
+                </div>
+              </div>
+              <div class="study-example-list">
+                ${studyExamples.map((example, index) => `
+                  <article class="study-example-card">
+                    <div class="study-example-card__header">
+                      <div>
+                        <p class="study-example-card__eyebrow">${index === 0 ? "?? ??" : "?? ??"}</p>
+                        <h3>${escapeHtml(currentWord.spanish)}</h3>
+                      </div>
+                      <button class="sound-button sound-button--small" data-action="speak" data-word="${escapeAttribute(example.sentence)}">??</button>
+                    </div>
+                    <p class="study-example-card__sentence">${escapeHtml(example.sentence)}</p>
+                    <p class="study-example-card__translation">${escapeHtml(example.translation)}</p>
+                    <div class="example-glossary">
+                      ${example.glossary.map((item) => `
+                        <span class="example-glossary__item">
+                          <strong>${escapeHtml(item.word)}</strong>
+                          <span>${escapeHtml(item.meaning)}</span>
+                        </span>
+                      `).join("")}
+                    </div>
+                  </article>
+                `).join("")}
+              </div>
+            </section>
+          </div>
         ` : ""}
 
                 ${state.activeTab === "learn" && state.learnScreen === "note" ? `
@@ -1151,6 +1186,40 @@ function getFlashcardTitleSize(text, isBack = false) {
   const reduction = isBack ? 0.16 : 0.28;
   const size = baseSize - Math.max(0, length - 4) * reduction;
   return `${Math.max(minSize, size).toFixed(2)}rem`;
+}
+
+function getStudyExamples(word) {
+  const baseExample = {
+    sentence: word.example,
+    translation: word.exampleKo,
+    glossary: word.exampleWords
+  };
+
+  const reviewExample = {
+    sentence: buildReviewSentence(word),
+    translation: buildReviewTranslation(word),
+    glossary: buildReviewGlossary(word)
+  };
+
+  return [baseExample, reviewExample];
+}
+
+function buildReviewSentence(word) {
+  return `Hoy practico la palabra "${word.spanish}" en una frase corta.`;
+}
+
+function buildReviewTranslation(word) {
+  return `??? "${word.korean}" ??? ?? ?? ??? ?? ????.`;
+}
+
+function buildReviewGlossary(word) {
+  return [
+    { word: "hoy", meaning: "??" },
+    { word: "practico", meaning: "????" },
+    { word: "la palabra", meaning: "? ??" },
+    { word: word.spanish, meaning: word.korean },
+    { word: "frase corta", meaning: "?? ??" }
+  ];
 }
 
 function setMascotReaction(mood, message) {
