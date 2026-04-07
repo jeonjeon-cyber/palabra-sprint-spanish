@@ -119,6 +119,9 @@ function initialize() {
 function renderApp() {
   persistRenderedNoteDraft();
   const app = document.getElementById("app");
+  if (state.learnScreen === "example") {
+    state.learnScreen = "card";
+  }
   const activeProfile = getActiveProfile();
   const progress = activeProfile ? activeProfile.progress : createEmptyProgress();
   const unlockedLevel = getLevel(progress.xp);
@@ -148,7 +151,6 @@ function renderApp() {
   const mascot = getMascotState(state.mascotMood);
   const frontTitleSize = getFlashcardTitleSize(currentWord.spanish);
   const backTitleSize = getFlashcardTitleSize(currentWord.korean, true);
-  const studyExamples = getStudyExamples(currentWord);
 
   app.innerHTML = `
     <div class="app-shell">
@@ -265,11 +267,10 @@ function renderApp() {
             </div>
             <div class="learn-screen-tabs">
               <button class="${state.learnScreen === "overview" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="overview">학습</button>
-              <button class="${state.learnScreen === "card" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="card">카드</button>
-              <button class="${state.learnScreen === "example" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="example">예문</button>
-              <button class="${state.learnScreen === "note" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="note">메모</button>
-              <button class="${state.learnScreen === "wordbank" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="wordbank">단어장</button>
-              <button class="${state.learnScreen === "quiz" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="quiz">퀴즈</button>
+              <button class="${state.learnScreen === "card" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="card">단어 카드</button>
+              <button class="${state.learnScreen === "note" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="note">음성 설정</button>
+              <button class="${state.learnScreen === "wordbank" ? "learn-screen-tab is-active" : "learn-screen-tab"}" data-action="set-learn-screen" data-screen="wordbank">내 단어장</button>
+              <button class="${state.learnScreen === "quiz" ? "learn-screen-tab learn-screen-tab--quiz is-active" : "learn-screen-tab learn-screen-tab--quiz"}" data-action="set-learn-screen" data-screen="quiz">퀴즈 모드</button>
             </div>
           </section>
         ` : ""}
@@ -285,18 +286,18 @@ function renderApp() {
             <div class="learn-overview-grid">
               <button class="learn-overview-card" data-action="set-learn-screen" data-screen="card">
                 <span class="learn-overview-card__eyebrow">Step 1</span>
-                <strong>카드 학습</strong>
-                <span>${escapeHtml(currentWord.spanish)} 단어부터 바로 외워보세요.</span>
-              </button>
-              <button class="learn-overview-card" data-action="set-learn-screen" data-screen="example">
-                <span class="learn-overview-card__eyebrow">Step 2</span>
-                <strong>예문 보기</strong>
-                <span>실제 문장에서 어떻게 쓰이는지 확인해보세요.</span>
+                <strong>단어 카드</strong>
+                <span>${escapeHtml(currentWord.spanish)} 단어부터 바로 익혀보세요.</span>
               </button>
               <button class="learn-overview-card" data-action="set-learn-screen" data-screen="note">
+                <span class="learn-overview-card__eyebrow">Step 2</span>
+                <strong>음성 설정</strong>
+                <span>목소리와 말하기 속도를 듣기 편하게 맞춰보세요.</span>
+              </button>
+              <button class="learn-overview-card" data-action="set-learn-screen" data-screen="wordbank">
                 <span class="learn-overview-card__eyebrow">Step 3</span>
-                <strong>메모 정리</strong>
-                <span>헷갈리는 점이나 나만의 암기법을 남겨보세요.</span>
+                <strong>내 단어장</strong>
+                <span>즐겨찾기와 복습 단어를 한 번에 정리해보세요.</span>
               </button>
             </div>
           </section>
@@ -391,69 +392,31 @@ function renderApp() {
               <button class="secondary-button" data-action="mark-known">외웠어요 +12XP</button>
               <button class="ghost-button" data-action="next-flashcard">다음 단어</button>
             </div>
-          </section>
-
-          <section class="panel study-example-side">
-            <div class="panel__header">
-              <div>
-                <p class="panel__eyebrow">Example Lab</p>
-                <h2>예문 2개로 복습</h2>
+            <div class="note-panel note-panel--card">
+              <div class="note-panel__header">
+                <div>
+                  <p class="note-panel__eyebrow">단어 메모장</p>
+                  <h3>${escapeHtml(currentWord.spanish)} 메모</h3>
+                </div>
+                <button class="ghost-button ghost-button--small" data-action="clear-note">지우기</button>
               </div>
-            </div>
-            <div class="study-example-list">
-              ${studyExamples.map((example, index) => `
-                <article class="study-example-card">
-                  <div class="study-example-card__header">
-                    <div>
-                      <p class="study-example-card__eyebrow">${index === 0 ? "기본 예문" : "복습 예문"}</p>
-                      <h3>${escapeHtml(currentWord.spanish)}</h3>
-                    </div>
-                    <button class="sound-button sound-button--small" data-action="speak" data-word="${escapeAttribute(example.sentence)}">듣기</button>
-                  </div>
-                  <p class="study-example-card__sentence">${escapeHtml(example.sentence)}</p>
-                  <p class="study-example-card__translation">${escapeHtml(example.translation)}</p>
-                  <div class="example-glossary">
-                    ${example.glossary.map((item) => `
-                      <span class="example-glossary__item">
-                        <strong>${escapeHtml(item.word)}</strong>
-                        <span>${escapeHtml(item.meaning)}</span>
-                      </span>
-                    `).join("")}
-                  </div>
-                </article>
-              `).join("")}
+              <textarea
+                id="word-note"
+                data-word-id="${currentWord.id}"
+                class="note-textarea"
+                placeholder="여기에 직접 적어보세요. 뜻, 헷갈리는 포인트, 나만의 예문을 남길 수 있어요."
+              >${escapeHtml(currentWordNote)}</textarea>
+              <div class="note-templates">
+                <button class="note-template" data-action="append-note-template" data-template="뜻: ${escapeAttribute(currentWord.korean)}&#10;">뜻 템플릿</button>
+                <button class="note-template" data-action="append-note-template" data-template="예문 따라쓰기: ${escapeAttribute(currentWord.example)}&#10;">예문 따라쓰기</button>
+                <button class="note-template" data-action="append-note-template" data-template="헷갈리는 점: &#10;">헷갈리는 점</button>
+              </div>
+              <p class="note-hint">단어별로 자동 저장됩니다. 다른 단어로 이동해도 다시 돌아오면 그대로 남아 있어요.</p>
             </div>
           </section>
         ` : ""}
 
-        ${state.activeTab === "learn" && state.learnScreen === "example" ? `
-          <section class="panel panel--wide">
-            <div class="panel__header">
-              <div>
-                <p class="panel__eyebrow">Real Example</p>
-                <h2>${escapeHtml(currentWord.spanish)} 실전 예문</h2>
-              </div>
-            </div>
-            <div class="example-panel">
-              <div class="example-panel__header">
-                <p class="example-panel__eyebrow">실전 예문</p>
-                <button class="sound-button sound-button--small" data-action="speak" data-word="${escapeAttribute(currentWord.example)}">예문 듣기</button>
-              </div>
-              <p class="example-panel__sentence">${escapeHtml(currentWord.example)}</p>
-              <p class="example-panel__translation">${escapeHtml(currentWord.exampleKo)}</p>
-              <div class="example-glossary">
-                ${currentWord.exampleWords.map((item) => `
-                  <span class="example-glossary__item">
-                    <strong>${escapeHtml(item.word)}</strong>
-                    <span>${escapeHtml(item.meaning)}</span>
-                  </span>
-                `).join("")}
-              </div>
-            </div>
-          </section>
-        ` : ""}
-
-        ${state.activeTab === "learn" && state.learnScreen === "note" ? `
+                ${state.activeTab === "learn" && state.learnScreen === "note" ? `
           <section class="panel note-side-panel">
             <div class="note-panel note-panel--embedded">
               <div class="voice-panel">
@@ -482,28 +445,9 @@ function renderApp() {
                     <option value="${item.value}" ${String(progress.speechRate) === item.value ? "selected" : ""}>${item.label}</option>
                   `).join("")}
                 </select>
-                <p class="voice-hint">브라우저가 지원하는 스페인어 음성 중에서 고를 수 있습니다. 기본 추천은 비교적 또렷한 스페인어 음성을 우선 선택합니다.</p>
+                <p class="voice-hint">브라우저가 지원하는 스페인어 음성 중에서 골라 들을 수 있습니다. 기본 추천은 비교적 또렷한 스페인어 음성을 우선 선택합니다.</p>
               </div>
-
-              <div class="note-panel__header">
-                <div>
-                  <p class="note-panel__eyebrow">단어 메모장</p>
-                  <h3>${escapeHtml(currentWord.spanish)} 메모</h3>
-                </div>
-                <button class="ghost-button ghost-button--small" data-action="clear-note">지우기</button>
-              </div>
-              <textarea
-                id="word-note"
-                data-word-id="${currentWord.id}"
-                class="note-textarea"
-                placeholder="여기에 직접 적어보세요. 뜻, 헷갈리는 포인트, 나만의 예문을 남길 수 있어요."
-              >${escapeHtml(currentWordNote)}</textarea>
-              <div class="note-templates">
-                <button class="note-template" data-action="append-note-template" data-template="뜻: ${escapeAttribute(currentWord.korean)}&#10;">뜻 템플릿</button>
-                <button class="note-template" data-action="append-note-template" data-template="예문 따라쓰기: ${escapeAttribute(currentWord.example)}&#10;">예문 따라쓰기</button>
-                <button class="note-template" data-action="append-note-template" data-template="헷갈리는 점: &#10;">헷갈리는 점</button>
-              </div>
-              <p class="note-hint">단어별로 자동 저장됩니다. 다음에 다시 와도 그대로 남아 있어요.</p>
+              <p class="note-hint">메모는 단어 카드 화면 아래에서 바로 적을 수 있어요. 이 화면은 발음 설정만 따로 모아둔 공간입니다.</p>
             </div>
           </section>
         ` : ""}
@@ -730,7 +674,6 @@ function bindEvents(levelWords, quizWord) {
 
   document.querySelectorAll("[data-action='toggle-favorite']").forEach((button) => {
     button.addEventListener("click", (event) => {
-      return;
       event.preventDefault();
       event.stopPropagation();
       const progress = getActiveProfile().progress;
@@ -748,7 +691,6 @@ function bindEvents(levelWords, quizWord) {
 
   document.querySelectorAll("[data-action='toggle-review']").forEach((button) => {
     button.addEventListener("click", (event) => {
-      return;
       event.preventDefault();
       event.stopPropagation();
       const progress = getActiveProfile().progress;
@@ -1209,40 +1151,6 @@ function getFlashcardTitleSize(text, isBack = false) {
   const reduction = isBack ? 0.16 : 0.28;
   const size = baseSize - Math.max(0, length - 4) * reduction;
   return `${Math.max(minSize, size).toFixed(2)}rem`;
-}
-
-function getStudyExamples(word) {
-  const baseExample = {
-    sentence: word.example,
-    translation: word.exampleKo,
-    glossary: word.exampleWords
-  };
-
-  const reviewExample = {
-    sentence: buildReviewSentence(word),
-    translation: buildReviewTranslation(word),
-    glossary: buildReviewGlossary(word)
-  };
-
-  return [baseExample, reviewExample];
-}
-
-function buildReviewSentence(word) {
-  return `Hoy practico la palabra "${word.spanish}" en una frase corta.`;
-}
-
-function buildReviewTranslation(word) {
-  return `오늘은 "${word.korean}" 단어를 짧은 문장 안에서 다시 연습해요.`;
-}
-
-function buildReviewGlossary(word) {
-  return [
-    { word: "hoy", meaning: "오늘" },
-    { word: "practico", meaning: "연습한다" },
-    { word: "la palabra", meaning: "그 단어" },
-    { word: word.spanish, meaning: word.korean },
-    { word: "frase corta", meaning: "짧은 문장" }
-  ];
 }
 
 function setMascotReaction(mood, message) {
