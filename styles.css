@@ -280,7 +280,7 @@ button {
 
 .profile-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
 }
 
@@ -294,6 +294,12 @@ button {
   border: 1px solid var(--line);
 }
 
+.profile-form--hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
 .profile-card h3 {
   font-size: 1.8rem;
   margin-bottom: 10px;
@@ -304,6 +310,10 @@ button {
   flex-wrap: wrap;
   gap: 10px;
   margin-top: 18px;
+}
+
+.level-selector--standalone {
+  margin-top: 8px;
 }
 
 .level-chip {

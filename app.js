@@ -194,6 +194,15 @@ function renderApp() {
             </div>
           </div>
           <div class="profile-grid">
+            <form class="profile-form profile-form--hero" id="profile-form">
+              <p class="profile-card__label">새 학습자 시작</p>
+              <h3>새 학습자 이름</h3>
+              <p class="profile-card__text">처음 쓰는 이름을 입력하고 바로 학습을 시작해보세요.</p>
+              <label class="input-label" for="profile-name">이름 입력</label>
+              <input id="profile-name" class="text-input" type="text" placeholder="예: Mina">
+              <button class="primary-button" type="submit">프로필 만들기</button>
+            </form>
+
             <div class="profile-card">
               <p class="profile-card__label">활성 사용자</p>
               <h3>${activeProfile ? escapeHtml(activeProfile.name) : "학습자를 만들어주세요"}</h3>
@@ -202,7 +211,13 @@ function renderApp() {
                 <div class="level-meter__fill" style="width: ${levelProgress}%"></div>
               </div>
               <p class="level-meter__text">XP ${progress.xp} · 다음 레벨 ${nextLevel.level}까지 ${Math.max(0, nextLevel.minXp - progress.xp)} XP</p>
-              <div class="level-selector">
+            </div>
+
+            <div class="profile-card">
+              <p class="profile-card__label">레벨 선택</p>
+              <h3>학습할 레벨 고르기</h3>
+              <p class="profile-card__text">현재 활성 사용자 기준으로 원하는 레벨을 바로 선택할 수 있어요.</p>
+              <div class="level-selector level-selector--standalone">
                 ${LEVELS.map((level) => {
                   const isActive = level.level === activeLevelNumber;
                   return `
@@ -218,10 +233,11 @@ function renderApp() {
                 }).join("")}
               </div>
             </div>
-            <form class="profile-form" id="profile-form">
-              <label class="input-label" for="profile-name">새 학습자 이름</label>
-              <input id="profile-name" class="text-input" type="text" placeholder="예: Mina">
-              <button class="primary-button" type="submit">프로필 만들기</button>
+
+            <div class="profile-card">
+              <p class="profile-card__label">기존 학습자 선택</p>
+              <h3>저장된 사용자</h3>
+              <p class="profile-card__text">기존 사용자 버튼을 눌러 바로 이어서 학습할 수 있습니다.</p>
               <div class="profile-switcher">
                 ${Object.values(state.db.users).map((user) => `
                   <button
@@ -234,7 +250,7 @@ function renderApp() {
                   </button>
                 `).join("")}
               </div>
-            </form>
+            </div>
           </div>
         </section>
         ` : ""}
