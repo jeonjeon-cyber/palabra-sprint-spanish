@@ -231,8 +231,6 @@ const state = {
   mascotMessage: "오늘도 차근차근 가보자!"
 };
 
-initialize();
-
 function initialize() {
   setupVoices();
   setupGlobalHandlers();
@@ -1877,3 +1875,5 @@ function escapeHtml(value) {
 function escapeAttribute(value) {
   return escapeHtml(value);
 }
+
+initialize();
